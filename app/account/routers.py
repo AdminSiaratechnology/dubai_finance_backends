@@ -56,7 +56,7 @@ async def login(session:SessionDep, user_login:UserLogin):
     "access_token",
     value=tokens["access_token"],
     httponly=True,
-    secure=True,
+    secure=False,
     samesite="lax",
     max_age=60*60*24*1
   )
@@ -64,7 +64,7 @@ async def login(session:SessionDep, user_login:UserLogin):
     "refresh_token",
     value=tokens["refresh_token"],
     httponly=True,
-    secure=True,
+    secure=False,
     samesite="lax",
     max_age=60*60*24*7
   )
