@@ -51,7 +51,13 @@ async def login(session:SessionDep, user_login:UserLogin):
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
   
   tokens = await create_tokens(session, user)
-  response = JSONResponse(content={"message": "Login successful"})
+#   response = JSONResponse(content={"message": "Login successful"})
+  response = JSONResponse(content={
+        "message": "Login successful",
+        "user": {
+            "role": user.role.value   # 👈 important
+        }
+    })
   response.set_cookie(
     "access_token",
     value=tokens["access_token"],
