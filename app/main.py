@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.account.routers import router as account_router
+from app.commission.routers.loan_type import router as loan_type_router
 from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
 
@@ -20,3 +21,4 @@ def root():
 
 
 app.include_router(account_router, prefix="/api/account", tags=["Account"])
+app.include_router(loan_type_router, prefix="/api/commission", tags=["Commission"])

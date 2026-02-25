@@ -2,7 +2,8 @@ from fastapi import Depends, HTTPException, status, Request
 from app.db.config import SessionDep
 from app.account.utils import decode_token
 from sqlalchemy import select
-from app.account.models import User
+from app.account.models import User, UserRole
+
 
 async def get_current_user(session: SessionDep, request: Request):
   token = request.cookies.get("access_token")
@@ -38,7 +39,7 @@ async def get_current_user(session: SessionDep, request: Request):
   return user
 
 async def require_admin(user: User = Depends(get_current_user)):
-  if not user.is_admin:
+  if user.role != UserRole.ADMIN:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
   return user
   
