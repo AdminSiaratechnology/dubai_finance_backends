@@ -2,8 +2,8 @@ from app.account.models import User, UserRole, AdminProfile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status
-from app.account.utils import hash_password, verify_password, get_user_by_email, create_password_reset_token
-from app.account.schemas import AdminRegister,UserLogin,UserResponse,AdminProfileResponse,PasswordChangeRequest,PasswordResetEmailRequest
+from app.account.utils import hash_password, verify_password, get_user_by_email, create_password_reset_token,verify_email_token_and_get_user_id,send_email
+from app.account.schemas import AdminRegister,UserLogin,UserResponse,AdminProfileResponse,PasswordChangeRequest,PasswordResetEmailRequest,PasswordResetRequest
 from sqlalchemy.orm import selectinload
 from typing import Optional
 
@@ -81,16 +81,61 @@ async def change_password(session: AsyncSession, user: User, data: PasswordChang
 # ------------------------------------------- Password Reset Email --------------------------
 
 
+# async def password_reset_email_send(session: AsyncSession, data: PasswordResetEmailRequest):
+#   user = await get_user_by_email(session, data.email)
+#   if not user:
+#       raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+#   token = create_password_reset_token(user.id)
+  
+#   link = f"http://localhost:8000/account/password-reset?token={token}"
+#   print(f"Reset your password: {link}")
+#   return {"msg": "Password reset link sent"}
+
 async def password_reset_email_send(session: AsyncSession, data: PasswordResetEmailRequest):
-  user = await get_user_by_email(session, data.email)
-  if not user:
-      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-  token = create_password_reset_token(user.id)
-  link = f"http://localhost:8000/account/password-reset?token={token}"
-  print(f"Reset your password: {link}")
-  return {"msg": "Password reset link sent"}
+    user = await get_user_by_email(session, data.email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    token = create_password_reset_token(user.id)
+
+    link = f"https://l26sd4rg-3000.inc1.devtunnels.ms/reset-password?token={token}"
+
+    send_email(
+        to_email=user.email,
+        subject="Password Reset Request",
+        body=f"""
+Hello,
+
+Click the link below to reset your password:
+
+{link}
+
+If you did not request this, please ignore this email.
+"""
+    )
+
+    return {"msg": "Password reset link sent to your email"}
 
 
+async def verify_password_reset_token(session: AsyncSession, data: PasswordResetRequest):
+  user_id = verify_email_token_and_get_user_id(data.token, "password_reset")
+  if not user_id:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
+  
+  stmt = select(User).where(User.id == user_id)
+  result = await session.scalars(stmt)
+  user = result.first()
+
+  if not user: 
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+  
+  user.hashed_password = hash_password(data.new_password)
+  session.add(user)
+  await session.commit()
+  return {"msg": "Password reset successful"}
 
 # ------------------------------------------- Password Reset Email End --------------------------
 

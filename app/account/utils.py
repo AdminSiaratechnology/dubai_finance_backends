@@ -7,7 +7,8 @@ import uuid
 from app.account.models import RefreshToken, User
 from sqlalchemy import select
 from fastapi import HTTPException
-
+import smtplib
+from email.message import EmailMessage
 
 
 JWT_SECRET_KEY = config("JWT_SECRET_KEY") 
@@ -15,6 +16,12 @@ JWT_ALGORITHM = config("JWT_ALGORITHM")
 JWT_ACCESS_TOKEN_TIME_MIN = config("JWT_ACCESS_TOKEN_TIME_MIN", cast=int) 
 JWT_REFRESH_TOKEN_TIME_DAY = config("JWT_REFRESH_TOKEN_TIME_DAY", cast=int) 
 EMAIL_PASSWORD_RESET_TOKEN_TIME_HOUR = config("EMAIL_PASSWORD_RESET_TOKEN_TIME_HOUR", cast=int) 
+
+
+SMTP_HOST = config("SMTP_HOST")
+SMTP_PORT = config("SMTP_PORT", cast=int)
+SMTP_USER = config("SMTP_USER")
+SMTP_PASSWORD = config("SMTP_PASSWORD")
 # ------------------------------------- hassed Password ----------------------- 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -31,7 +38,17 @@ def verify_password(plain_password, hashed_password):
 
 
 
+def send_email(to_email: str, subject: str, body: str):
+    msg = EmailMessage()
+    msg["From"] = SMTP_USER
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.set_content(body)
 
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        server.starttls()
+        server.login(SMTP_USER, SMTP_PASSWORD)
+        server.send_message(msg)
 
 # --------------------------- Access Token -------------------------------------------------- 
 
@@ -94,6 +111,13 @@ async def verify_refresh_token(session : AsyncSession, token: str):
   return None
 
 
+
+   
+def verify_email_token_and_get_user_id(token: str, token_type: str):
+  payload = decode_token(token)
+  if not payload or payload.get("type") != token_type:
+    return None
+  return int(payload.get("sub"))
 
 
 # ----------------------------- get user by email ----------------------------

@@ -5,7 +5,8 @@ from app.account.schemas import (
     PasswordChangeRequest,
     PasswordResetEmailRequest,
     UserCreate,
-    UserResponse
+    UserResponse,
+    PasswordResetRequest
     
     
 
@@ -17,7 +18,8 @@ from app.account.services import (
     UserWithProfile,
     get_user_with_profile,
     change_password,
-    password_reset_email_send
+    password_reset_email_send,
+    verify_password_reset_token
     
     
 )
@@ -55,7 +57,7 @@ async def login(session:SessionDep, user_login:UserLogin):
   response = JSONResponse(content={
         "message": "Login successful",
         "user": {
-            "role": user.role.value   # 👈 important
+            "role": user.role.value   
         }
     })
   response.set_cookie(
@@ -149,6 +151,12 @@ async def password_change(session: SessionDep, data: PasswordChangeRequest, user
 async def send_password_reset_email(session: SessionDep, data: PasswordResetEmailRequest):
   return await password_reset_email_send(session, data)
 
+
+
+
+@router.post("/verify-password-reset-token")
+async def verify_password_reset_email(session: SessionDep, data: PasswordResetRequest):
+  return await verify_password_reset_token(session, data)
 
 
 # -------------------------------------------- Reset Password End --------------------------------------
