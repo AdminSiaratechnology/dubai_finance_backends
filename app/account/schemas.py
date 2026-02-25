@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class BaseRegister(BaseModel):
-    name: str
+    
     email: EmailStr
     
    
@@ -19,6 +19,7 @@ class UserCreate(BaseRegister):
 
 
 class AdminRegister(UserCreate):
+    name : str
     phone: str
     address: str
     # department: str
@@ -93,10 +94,10 @@ class AdminProfileBase(BaseModel):
 class AdminProfileResponse(AdminProfileBase):
     id: int
     user_id: int
+    name : str
 
     class Config:
         from_attributes = True
-
 
 
 

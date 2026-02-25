@@ -22,7 +22,7 @@ async def register_admin_service(data: AdminRegister, db: AsyncSession):
 
     try:
         user = User(
-            name=data.name,
+            
             email=data.email,
             password_hash=hash_password(data.password),
             role=UserRole.ADMIN
@@ -32,11 +32,12 @@ async def register_admin_service(data: AdminRegister, db: AsyncSession):
 
         profile = AdminProfile(
             user_id=user.id,
+            name = data.name,
             phone=data.phone,
             address=data.address,
         )
         db.add(profile)
-        await db.commit()  # commit once at the end
+        await db.commit() 
 
         return {"message": "Admin registered successfully"}
 
