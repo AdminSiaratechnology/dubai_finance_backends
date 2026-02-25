@@ -133,7 +133,7 @@ async def verify_password_reset_token(session: AsyncSession, data: PasswordReset
   if not user: 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
   
-  user.hashed_password = hash_password(data.new_password)
+  user.password_hash = hash_password(data.new_password)
   session.add(user)
   await session.commit()
   return {"msg": "Password reset successful"}
