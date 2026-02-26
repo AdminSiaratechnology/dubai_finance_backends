@@ -1,8 +1,10 @@
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Table, Column, Text
+from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Table, Column, Text, Boolean, Enum
 from app.db.base import Base
 from datetime import datetime, timezone
+
+from app.commission.schemas import LoanStatus 
 
 
 loantype_bank_table = Table(
@@ -36,6 +38,17 @@ class LoanType(Base):
 
   id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
   name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+
+  status: Mapped[LoanStatus] = mapped_column(
+        Enum(LoanStatus, name="loan_status_enum"),
+        nullable=True,                # initially True for safe migration
+        default=LoanStatus.active,    # SQLAlchemy default
+        server_default="active"       # PostgreSQL default
+    )
+  description: Mapped[str] = mapped_column(
+        Text,
+        nullable=True
+    )
 
   banks: Mapped[list["Bank"]] = relationship("Bank", secondary=loantype_bank_table, back_populates="loan_types")
 
