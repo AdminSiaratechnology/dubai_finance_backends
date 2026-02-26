@@ -65,7 +65,8 @@ async def login(session:SessionDep, user_login:UserLogin):
     value=tokens["access_token"],
     httponly=True,
     secure=False,
-    samesite="lax",
+    samesite=None,
+    # samesite="lax",
     max_age=60*60*24*1
   )
   response.set_cookie(
@@ -73,7 +74,8 @@ async def login(session:SessionDep, user_login:UserLogin):
     value=tokens["refresh_token"],
     httponly=True,
     secure=False,
-    samesite="lax",
+    # samesite="lax",
+    samesite=None,
     max_age=60*60*24*7
   )
   return response
@@ -112,7 +114,8 @@ async def refresh_token(session: SessionDep, request: Request):
         value=tokens["access_token"],
         httponly=True,
         secure=False,
-        samesite="lax",
+        # samesite="lax",
+        samesite=None,
         max_age=60 * 60 * 24 * 1
     )
     response.set_cookie(
@@ -120,7 +123,8 @@ async def refresh_token(session: SessionDep, request: Request):
         value=tokens["refresh_token"],
         httponly=True,
         secure=False,
-        samesite="lax",
+        # samesite="lax",
+        samesite=None,
         max_age=60 * 60 * 24 * 7
     )
     return response

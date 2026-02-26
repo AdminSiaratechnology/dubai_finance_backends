@@ -25,9 +25,15 @@ class Bank(Base):
   default_tat_days: Mapped[int] = mapped_column(default=0)
   description: Mapped[str] = mapped_column(Text, nullable=True)
   image_url: Mapped[str] = mapped_column(String(255), nullable=True)
+  category_id: Mapped[int] = mapped_column(Integer, ForeignKey("bank_categories.id", ondelete="SET NULL"), nullable=True)
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
   updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc))
 
+
+  category: Mapped["BankCategory"] = relationship(
+        "BankCategory",
+        back_populates="banks"
+    )
   loan_types: Mapped[list["LoanType"]] = relationship("LoanType", secondary=loantype_bank_table, back_populates="banks")
   
 
@@ -54,16 +60,31 @@ class LoanType(Base):
 
 
 
+class BankCategory(Base):
+    __tablename__ = "bank_categories"
 
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    status: Mapped[LoanStatus] = mapped_column(
+        Enum(LoanStatus),
+        nullable=True,                # initially True for safe migration
+        default=LoanStatus.active,    # SQLAlchemy default
+        server_default="active"       # PostgreSQL default
+    )
 
-# class CartItem(Base):
-#   __tablename__ = "cart_items"
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )
 
-#   id: Mapped[int] = mapped_column(primary_key=True, index=True)
-#   user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-#   product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id", ondelete="SET NULL"), nullable=True)
-#   quantity: Mapped[int] = mapped_column(default=1)
-#   price: Mapped[float] = mapped_column(Float, nullable=False)
-
-#   user: Mapped["User"] = relationship("User", back_populates="cart_items")
-#   product: Mapped["Product"] = relationship("Product", back_populates="cart_items")
+    # One-to-Many: A category has multiple banks
+    banks: Mapped[list["Bank"]] = relationship(
+        "Bank",
+        back_populates="category"
+    )
