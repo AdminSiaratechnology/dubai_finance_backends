@@ -35,3 +35,23 @@ class PaginatedProductOut(BaseModel):
     page: int
     limit: int
     items: list[LoanTypeOut]
+
+
+
+########################################## Category#########################################    
+
+
+
+class CategoryBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    status: LoanStatus = LoanStatus.active   # default active 
+
+
+
+class CategoryOut(CategoryBase):
+    id: int
+    name: str
+    model_config = {
+        "from_attributes": True
+    }
