@@ -77,3 +77,68 @@ async def get_all_loan_type(
         "limit": limit,
         "items": items,
     }
+
+
+
+################# Get Loan Type By ID ###################
+
+async def get_loan_type_by_id(
+    session: AsyncSession,
+    loan_type_id: int
+) -> LoanTypeOut:
+
+    stmt = select(LoanType).where(LoanType.id == loan_type_id)
+    result = await session.execute(stmt)
+    loan_type = result.scalar_one_or_none()
+
+    if not loan_type:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Loan type not found"
+        )
+
+    return loan_type
+
+
+
+################# Update Loan Type ###################
+
+async def update_loan_type(
+    session: AsyncSession,
+    loan_type_id: int,
+    loantype_data: LoanCreate
+) -> LoanTypeOut:
+
+    stmt = select(LoanType).where(LoanType.id == loan_type_id)
+    result = await session.execute(stmt)
+    loan_type = result.scalar_one_or_none()
+
+    if not loan_type:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Loan type not found"
+        )
+
+    # 🔎 Check duplicate name (excluding current record)
+    duplicate_stmt = select(LoanType).where(
+        LoanType.name == loantype_data.name,
+        LoanType.id != loan_type_id
+    )
+    duplicate_result = await session.execute(duplicate_stmt)
+    existing = duplicate_result.scalar_one_or_none()
+
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Loan type with this name already exists"
+        )
+
+    # ✅ Update fields
+    loan_type.name = loantype_data.name
+    loan_type.status = loantype_data.status
+    loan_type.description = loantype_data.description
+
+    await session.commit()
+    await session.refresh(loan_type)
+
+    return loan_type

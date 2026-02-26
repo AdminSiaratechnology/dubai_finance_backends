@@ -21,4 +21,4 @@ def root():
 
 
 app.include_router(account_router, prefix="/api/account", tags=["Account"])
-app.include_router(loan_type_router, prefix="/api/commission", tags=["Commission"])
+app.include_router(loan_type_router, prefix="/api/loantype", tags=["Loan Type"])
