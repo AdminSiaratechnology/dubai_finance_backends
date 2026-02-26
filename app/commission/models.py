@@ -24,7 +24,13 @@ class Bank(Base):
   short_code: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
   default_tat_days: Mapped[int] = mapped_column(default=0)
   description: Mapped[str] = mapped_column(Text, nullable=True)
-  image_url: Mapped[str] = mapped_column(String(255), nullable=True)
+  status: Mapped[LoanStatus] = mapped_column(
+        Enum(LoanStatus, name="bank_status_enum"),
+        nullable=True,                # initially True for safe migration
+        default=LoanStatus.active,    # SQLAlchemy default
+        server_default="active"       # PostgreSQL default
+    )
+  logo_url: Mapped[str] = mapped_column(String(255), nullable=True)
   category_id: Mapped[int] = mapped_column(Integer, ForeignKey("bank_categories.id", ondelete="SET NULL"), nullable=True)
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
   updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc))

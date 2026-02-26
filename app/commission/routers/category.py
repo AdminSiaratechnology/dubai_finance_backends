@@ -1,14 +1,74 @@
-# from fastapi import APIRouter, Depends, HTTPException, status,Query
-# from app.account.deps import require_admin
-# from app.account.models import User
-# from app.db.config import SessionDep
-# from app.commission.schemas import LoanCreate,CategoryOut,PaginatedProductOut,LoanStatus
+from fastapi import APIRouter, Depends, Query
+from typing import Optional
+
+from app.account.deps import require_admin
+from app.account.models import User
+from app.db.config import SessionDep
+from app.commission.schemas import (
+    CategoryCreate,
+    CategoryOut,
+    PaginatedProductOut,
+    LoanStatus
+)
+from app.commission.services import (
+    create_category,
+    get_all_categories,
+    get_category_by_id,
+    update_category
+)
+
+router = APIRouter()
 
 
-# router = APIRouter()
+# ✅ Create Category
+@router.post("", response_model=CategoryOut)
+async def category_create(
+    session: SessionDep,
+    category: CategoryCreate,
+    admin_user: User = Depends(require_admin)
+):
+    return await create_category(session, category)
 
 
+# ✅ Get All Categories
+@router.get("", response_model=PaginatedProductOut)
+async def category_list(
+    session: SessionDep,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, le=100),
+    search: Optional[str] = None,
+    status: Optional[LoanStatus] = LoanStatus.active,
+    admin_user: User = Depends(require_admin)
+):
+    return await get_all_categories(
+        session,
+        page,
+        limit,
+        search,
+        status
+    )
 
-# @router.post("", response_model=CategoryOut)
-# async def loan_type_create(session: SessionDep, loantypecreate: LoanCreate, admin_user: User = Depends(require_admin)):
-#   return await create_loan_type(session, loantypecreate)
+
+# ✅ Get Category By ID
+@router.get("/{category_id}", response_model=CategoryOut)
+async def category_detail(
+    category_id: int,
+    session: SessionDep,
+    admin_user: User = Depends(require_admin)
+):
+    return await get_category_by_id(session, category_id)
+
+
+# ✅ Update Category
+@router.put("/{category_id}", response_model=CategoryOut)
+async def category_update(
+    category_id: int,
+    category: CategoryCreate,
+    session: SessionDep,
+    admin_user: User = Depends(require_admin)
+):
+    return await update_category(
+        session,
+        category_id,
+        category
+    )
