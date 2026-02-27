@@ -2,7 +2,7 @@ from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.commission.models import Bank, LoanType,BankCategory
-from app.commission.schemas import LoanCreate,LoanTypeOut,LoanStatus,CategoryCreate,CategoryOut,BankBase,BankCreate
+from app.commission.schemas import LoanCreate,LoanTypeOut,LoanStatus,CategoryCreate,CategoryOut,BankBase,BankCreate,BankUpdate
 from typing import Optional
 from sqlalchemy.orm import selectinload
 
