@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends
-from typing import List
-
+from fastapi import APIRouter, Depends,UploadFile,File,Form,HTTPException,status,Query 
+from typing import List, Annotated
+from app.account.deps import require_admin,User
 from app.db.config import SessionDep
-from app.commission.schemas import BankCreate, BankOut, BankUpdate
+from app.commission.schemas import BankCreate, BankOut, BankUpdate, LoanStatus
 from app.commission.services import (
     create_bank,
     get_all_banks,
@@ -16,11 +16,31 @@ router = APIRouter()
 
 # 🔹 Create Bank
 @router.post("/", response_model=BankOut)
-async def create_bank_api(
-    bank_data: BankCreate,
-    session: SessionDep
+async def bank_create(
+    session: SessionDep,
+    name: str = Form(...),
+    short_code: str = Form(...),
+    default_tat_days: int = Form(...),
+    description: str | None = Form(None),
+    status : LoanStatus = Form(...),
+    category_id: int | None = Form(None), 
+    loan_type_ids : Annotated[list[int], Form()] = [],
+    image: UploadFile | None = File(None),
+    admin_user: User = Depends(require_admin)
+
+
 ):
-    return await create_bank(session, bank_data)
+    data = BankCreate(
+        name = name,
+        short_code = short_code,
+        default_tat_days = default_tat_days,
+        description = description,
+        status = status,
+        category_id=category_id,
+        loan_type_ids=loan_type_ids
+        
+    )
+    return await create_bank(session, data, image_url = image  )
 
 
 # 🔹 Get All Banks

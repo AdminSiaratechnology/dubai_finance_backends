@@ -5,8 +5,13 @@ from app.commission.routers.category import router as category_router
 from app.commission.routers.bank import router as bank_router
 from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI(title="FastAPI Dubai Finance Backend")
+
+
+app.mount("/media", StaticFiles(directory="media"), name="media")
 
 app.add_middleware(
     CORSMiddleware,

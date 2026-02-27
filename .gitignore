@@ -218,3 +218,5 @@ __marimo__/
 
 # Alembic cache
 alembic/__pycache__/
+
+media/

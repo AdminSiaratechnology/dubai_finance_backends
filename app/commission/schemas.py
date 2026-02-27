@@ -73,13 +73,14 @@ class BankBase(BaseModel):
     default_tat_days: int = 0
     description: Optional[str] = None
     status: LoanStatus = LoanStatus.active
-    logo_url: Optional[str] = None
-    category_id: Optional[int] = None
-    loan_type_ids: Optional[List[int]] = None
+    # logo_url: Optional[str] = None
+    
+    
 
 
 class BankCreate(BankBase):
-    pass
+    category_id: int | None = None
+    loan_type_ids: list[int] | None = None
 
 
 class BankUpdate(BaseModel):
@@ -95,6 +96,9 @@ class BankUpdate(BaseModel):
 
 class BankOut(BankBase):
     id: int
+    category_id: int | None = None   
+    loan_types: list[LoanTypeOut] = []
+    logo_url: str | None = None
 
     model_config = {
         "from_attributes": True

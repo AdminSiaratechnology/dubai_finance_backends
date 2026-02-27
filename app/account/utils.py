@@ -136,3 +136,19 @@ def create_password_reset_token(user_id: int):
 
 
 # ----------------------------- get user by email End----------------------------
+
+
+
+
+# -------------------------------------- Revoke Token --------------------------
+
+
+
+async def revoke_refresh_token(session: AsyncSession, token: str):
+    stmt = select(RefreshToken).where(RefreshToken.token == token)
+    result = await session.scalars(stmt)
+    db_refresh_token = result.first()
+
+    if db_refresh_token:
+        db_refresh_token.revoked = True
+        await session.commit()

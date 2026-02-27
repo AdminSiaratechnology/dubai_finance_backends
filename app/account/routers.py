@@ -23,7 +23,7 @@ from app.account.services import (
     
     
 )
-from app.account.utils import create_tokens, verify_refresh_token
+from app.account.utils import create_tokens, verify_refresh_token, revoke_refresh_token
 from fastapi.responses import JSONResponse
 from app.account.deps import get_current_user
 from app.account.models import User
@@ -168,3 +168,12 @@ async def verify_password_reset_email(session: SessionDep, data: PasswordResetRe
 
 
 
+@router.post("/logout")
+async def logout(session: SessionDep, request: Request, user: User = Depends(get_current_user)):
+  refresh_token = request.cookies.get("refresh_token")
+  if refresh_token:
+    await revoke_refresh_token(session, refresh_token)
+  response = JSONResponse(content={"detail": "Logged out"})
+  response.delete_cookie("refresh_token")
+  response.delete_cookie("access_token")
+  return response
