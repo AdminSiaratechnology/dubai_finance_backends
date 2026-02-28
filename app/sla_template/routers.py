@@ -64,10 +64,12 @@ async def sla_template_update(
     
 
 #  SLA DELETE 
-@router.delete("/{sla_template_id}", status_code=204)
+@router.delete("/{sla_template_id}")
 async def sla_template_delete(
     sla_template_id: int,
     session: SessionDep,
     admin_user: User = Depends(require_admin)
 ):
-    await delete_sla_template(session, sla_template_id)
+    result = await delete_sla_template(session, sla_template_id)
+    
+    return result
