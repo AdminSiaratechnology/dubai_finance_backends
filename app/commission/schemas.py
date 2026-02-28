@@ -96,7 +96,8 @@ class BankUpdate(BaseModel):
 
 class BankOut(BankBase):
     id: int
-    category_id: int | None = None   
+    # category_id: int | None = None   
+    category: CategoryOut | None = None   # 👈 yaha change
     loan_types: list[LoanTypeOut] = []
     logo_url: str | None = None
 

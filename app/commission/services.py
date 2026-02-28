@@ -350,13 +350,28 @@ async def create_bank(session: AsyncSession, bank_data: BankCreate, image_url: U
             raise HTTPException(400, "Invalid category_id")
 
             
-    image_path = await save_upload_file(image_url, "images")
+    image_path = await save_upload_file(image_url, "companylogo")
 
+    # loan_types = []
+    # if bank_data.loan_type_ids:
+    #     laon_type_stmt = select(LoanType).where(LoanType.id.in_(bank_data.loan_type_ids))
+    #     loan_type_result = await session.execute(laon_type_stmt)
+    #     loan_types = loan_type_result.scalars().all()
     loan_types = []
     if bank_data.loan_type_ids:
-        laon_type_stmt = select(LoanType).where(LoanType.id.in_(bank_data.loan_type_ids))
+        laon_type_stmt = select(LoanType).where(
+            LoanType.id.in_(bank_data.loan_type_ids)
+        )
         loan_type_result = await session.execute(laon_type_stmt)
         loan_types = loan_type_result.scalars().all()
+
+        # 🔹 Validate all IDs exist
+        if len(loan_types) != len(set(bank_data.loan_type_ids)):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid loan type id"
+            )
+
     bank_dict = bank_data.model_dump(exclude={'loan_type_ids'})
 
     new_bank = Bank(**bank_dict, logo_url=image_path,loan_types=loan_types)
@@ -421,28 +436,89 @@ async def get_bank_by_id(session: AsyncSession, bank_id: int):
 
 
 # 🔹 Update Bank
-async def update_bank(session: AsyncSession, bank_id: int, bank_data: BankUpdate):
 
-    bank = await get_bank_by_id(session, bank_id)
+async def update_bank(
+    session: AsyncSession,
+    bank_id: int,
+    bank_data: BankCreate,
+    image_url: UploadFile | None = None
+) -> Bank:
 
-    update_data = bank_data.model_dump(exclude_unset=True)
+    
+    result = await session.execute(
+    select(Bank)
+    .options(selectinload(Bank.loan_types))
+    .where(Bank.id == bank_id)
+)
+    bank = result.scalar_one_or_none()
 
-    for key, value in update_data.items():
-        if key != "loan_type_ids":
-            setattr(bank, key, value)
+    if not bank:
+        raise HTTPException(404, "Bank not found")
 
-    # Update Loan Types
-    if bank_data.loan_type_ids is not None:
-        result = await session.execute(
-            select(LoanType).where(LoanType.id.in_(bank_data.loan_type_ids))
+    # 🔹 Normalize short_code
+    bank_data.short_code = bank_data.short_code.lower()
+
+    # 🔹 Unique validation (exclude current bank)
+    existing_stmt = select(Bank).where(
+        or_(
+            Bank.name == bank_data.name,
+            Bank.short_code == bank_data.short_code
+        ),
+        Bank.id != bank_id
+    )
+    result = await session.execute(existing_stmt)
+    existing_bank = result.scalar_one_or_none()
+
+    if existing_bank:
+        if existing_bank.name == bank_data.name:
+            raise HTTPException(400, "Bank name already exists")
+        if existing_bank.short_code == bank_data.short_code:
+            raise HTTPException(400, "Short code already exists")
+
+    # 🔹 Category validation
+    if bank_data.category_id:
+        category_result = await session.execute(
+            select(BankCategory).where(
+                BankCategory.id == bank_data.category_id
+            )
         )
-        bank.loan_types = list(result.scalars().all())
+        category = category_result.scalar_one_or_none()
+        if not category:
+            raise HTTPException(400, "Invalid category_id")
+
+    # 🔹 Loan type validation
+    loan_types = []
+    if bank_data.loan_type_ids:
+        loan_type_result = await session.execute(
+            select(LoanType).where(
+                LoanType.id.in_(bank_data.loan_type_ids)
+            )
+        )
+        loan_types = loan_type_result.scalars().all()
+
+        if len(loan_types) != len(set(bank_data.loan_type_ids)):
+            raise HTTPException(400, "Invalid loan type id")
+
+    # 🔹 Update Image (if provided)
+    if image_url:
+        image_path = await save_upload_file(image_url, "companylogo")
+        bank.logo_url = image_path
+
+    # 🔹 Update fields
+    bank.name = bank_data.name
+    bank.short_code = bank_data.short_code
+    bank.default_tat_days = bank_data.default_tat_days
+    bank.description = bank_data.description
+    bank.status = bank_data.status
+    bank.category_id = bank_data.category_id
+
+    # 🔹 Update loan types (replace old)
+    bank.loan_types = loan_types
 
     await session.commit()
     await session.refresh(bank)
 
     return bank
-
 
 # 🔹 Delete Bank
 async def delete_bank(session: AsyncSession, bank_id: int):

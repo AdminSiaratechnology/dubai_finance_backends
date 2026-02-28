@@ -60,15 +60,42 @@ async def get_single_bank_api(
     return await get_bank_by_id(session, bank_id)
 
 
+# # 🔹 Update Bank
+# @router.put("/{bank_id}", response_model=BankOut)
+# async def update_bank_api(
+#     bank_id: int,
+#     bank_data: BankUpdate,
+#     session: SessionDep
+# ):
+#     return await update_bank(session, bank_id, bank_data)
+
+
 # 🔹 Update Bank
 @router.put("/{bank_id}", response_model=BankOut)
-async def update_bank_api(
+async def bank_update(
     bank_id: int,
-    bank_data: BankUpdate,
-    session: SessionDep
+    session: SessionDep,
+    name: str = Form(...),
+    short_code: str = Form(...),
+    default_tat_days: int = Form(...),
+    description: str | None = Form(None),
+    status: LoanStatus = Form(...),
+    category_id: int | None = Form(None),
+    loan_type_ids: Annotated[list[int], Form()] = [],
+    image: UploadFile | None = File(None),
+    admin_user: User = Depends(require_admin)
 ):
-    return await update_bank(session, bank_id, bank_data)
+    data = BankCreate(
+        name=name,
+        short_code=short_code,
+        default_tat_days=default_tat_days,
+        description=description,
+        status=status,
+        category_id=category_id,
+        loan_type_ids=loan_type_ids
+    )
 
+    return await update_bank(session, bank_id, data, image_url=image)
 
 # 🔹 Delete Bank
 @router.delete("/{bank_id}")
