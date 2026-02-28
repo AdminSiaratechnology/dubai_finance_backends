@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends,UploadFile,File,Form,HTTPException,status,Query 
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 from app.account.deps import require_admin,User
 from app.db.config import SessionDep
-from app.commission.schemas import BankCreate, BankOut, BankUpdate, LoanStatus
+from app.commission.schemas import BankCreate, BankOut, BankUpdate, LoanStatus, PaginatedBankOut
+
+
 from app.commission.services import (
     create_bank,
     get_all_banks,
@@ -44,11 +46,16 @@ async def bank_create(
 
 
 # 🔹 Get All Banks
-@router.get("/", response_model=List[BankOut])
+@router.get("/", response_model=PaginatedBankOut)
 async def get_all_banks_api(
-    session: SessionDep
+    session: SessionDep,
+    page: int = Query(1, ge=1),
+    limit: int = Query(5, ge=1),
+    search: Optional[str] = Query(None),
+    status: Optional[LoanStatus] = Query(LoanStatus.active, description="Filter by loan status"),
+    admin_user: User = Depends(require_admin)
 ):
-    return await get_all_banks(session)
+    return await get_all_banks(session, page, limit, search, status)
 
 
 # 🔹 Get Single Bank

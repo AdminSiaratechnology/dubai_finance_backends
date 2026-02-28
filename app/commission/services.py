@@ -408,14 +408,66 @@ async def create_bank(
 
     return created_bank
 # 🔹 Get All Banks
-async def get_all_banks(session: AsyncSession):
-    result = await session.execute(
-        select(Bank).options(
+async def get_all_banks(
+    
+        session: AsyncSession,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[str] = None,
+        status: Optional[LoanStatus] = LoanStatus.active  # new
+    ):
+    # Safety checks
+    page = max(page, 1)
+    limit = max(min(limit, 100), 1)
+    filters = []
+     # 🔎 Search filter
+    if search:
+        filters.append(Bank.name.ilike(f"%{search.strip()}%"))
+    # 🔹 Status filter
+    if status:
+        filters.append(Bank.status == status)
+     # ✅ Total count
+    count_stmt = select(func.count(Bank.id)).where(*filters)
+    total = (await session.execute(count_stmt)).scalar_one()
+    # Early return if no data
+    if total == 0:
+        return {
+            "total": 0,
+            "page": page,
+            "limit": limit,
+            "items": [],
+        }
+
+
+     # ✅ Main query with ordering & pagination
+    stmt = (
+        select(Bank)
+        .where(*filters)
+        .options(
             selectinload(Bank.loan_types),
             selectinload(Bank.category)
         )
+        .order_by(Bank.id.desc())
+        .offset((page - 1) * limit)
+        .limit(limit)
     )
-    return result.scalars().all()
+    result = await session.execute(stmt)
+    # result = await session.execute(
+    #     select(Bank).options(
+    #         selectinload(Bank.loan_types),
+    #         selectinload(Bank.category)
+    #     )
+    # )
+    
+    banks = result.scalars().all()
+
+    return {
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "items": banks,
+    }
+
 
 
 # 🔹 Get Single Bank

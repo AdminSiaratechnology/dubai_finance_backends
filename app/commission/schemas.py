@@ -104,3 +104,16 @@ class BankOut(BankBase):
     model_config = {
         "from_attributes": True
     }
+
+
+
+
+
+
+
+class PaginatedBankOut(BaseModel):
+    total: int
+    page: int
+    limit: int
+    items: list[BankOut]
+
