@@ -151,9 +151,6 @@ async def update_loan_type(
 
 ################# Bank Category ###################
 
-# from app.commission.models import BankCategory
-# from app.commission.schemas import CategoryCreate, CategoryOut
-
 
 # ✅ Create Category
 async def create_category(
@@ -312,99 +309,104 @@ async def update_category(
 
 
 
-# 🔹 Create Bank
-async def create_bank(session: AsyncSession, bank_data: BankCreate, image_url: UploadFile | None = None) -> Bank:
+async def create_bank(
+    session: AsyncSession,
+    bank_data: BankCreate,
+    image_url: UploadFile | None = None
+) -> Bank:
 
-    # 🔹 Normalize short_code (optional but recommended)
+    # 🔹 Normalize short_code
     bank_data.short_code = bank_data.short_code.lower()
 
-
+    # =====================================================
+    # 🔹 Duplicate Check
+    # =====================================================
     existing_stmt = select(Bank).where(
         or_(
             Bank.name == bank_data.name,
             Bank.short_code == bank_data.short_code
         )
     )
+
     result = await session.execute(existing_stmt)
     existing_bank = result.scalar_one_or_none()
+
     if existing_bank:
         if existing_bank.name == bank_data.name:
-            raise HTTPException(
-                status_code=400,
-                detail="Bank name already exists"
-            )
+            raise HTTPException(400, "Bank name already exists")
         if existing_bank.short_code == bank_data.short_code:
-            raise HTTPException(
-                status_code=400,
-                detail="Short code already exists"
-            )
-         # 🔹 Category Validation
-    if bank_data.category_id:
-        category_stmt = select(BankCategory).where(
-            BankCategory.id == bank_data.category_id
-        )
-        category_result = await session.execute(category_stmt)
-        category = category_result.scalar_one_or_none()
+            raise HTTPException(400, "Short code already exists")
 
-        if not category:
+    # =====================================================
+    # 🔹 Category Validation
+    # =====================================================
+    if bank_data.category_id:
+        category_result = await session.execute(
+            select(BankCategory).where(
+                BankCategory.id == bank_data.category_id
+            )
+        )
+        if not category_result.scalar_one_or_none():
             raise HTTPException(400, "Invalid category_id")
 
-            
-    image_path = await save_upload_file(image_url, "companylogo")
+    # =====================================================
+    # 🔹 Save Image
+    # =====================================================
+    image_path = None
+    if image_url:
+        image_path = await save_upload_file(image_url, "companylogo")
 
-    # loan_types = []
-    # if bank_data.loan_type_ids:
-    #     laon_type_stmt = select(LoanType).where(LoanType.id.in_(bank_data.loan_type_ids))
-    #     loan_type_result = await session.execute(laon_type_stmt)
-    #     loan_types = loan_type_result.scalars().all()
+    # =====================================================
+    # 🔹 Loan Type Validation
+    # =====================================================
     loan_types = []
     if bank_data.loan_type_ids:
-        laon_type_stmt = select(LoanType).where(
-            LoanType.id.in_(bank_data.loan_type_ids)
+        loan_type_result = await session.execute(
+            select(LoanType).where(
+                LoanType.id.in_(bank_data.loan_type_ids)
+            )
         )
-        loan_type_result = await session.execute(laon_type_stmt)
+
         loan_types = loan_type_result.scalars().all()
 
-        # 🔹 Validate all IDs exist
-        if len(loan_types) != len(set(bank_data.loan_type_ids)):
+        found_ids = {lt.id for lt in loan_types}
+        invalid_ids = set(bank_data.loan_type_ids) - found_ids
+
+        if invalid_ids:
             raise HTTPException(
-                status_code=400,
-                detail="Invalid loan type id"
+                400,
+                f"Invalid loan type id(s): {list(invalid_ids)}"
             )
 
-    bank_dict = bank_data.model_dump(exclude={'loan_type_ids'})
+    # =====================================================
+    # 🔹 Create Bank
+    # =====================================================
+    bank_dict = bank_data.model_dump(exclude={"loan_type_ids"})
 
-    new_bank = Bank(**bank_dict, logo_url=image_path,loan_types=loan_types)
+    new_bank = Bank(
+        **bank_dict,
+        logo_url=image_path,
+        loan_types=loan_types
+    )
+
     session.add(new_bank)
     await session.commit()
-    return new_bank
 
+    # =====================================================
+    # 🔹 Re-fetch with eager loading (VERY IMPORTANT)
+    # =====================================================
+    result = await session.execute(
+        select(Bank)
+        .options(
+            selectinload(Bank.loan_types),
+            selectinload(Bank.category)
+        )
+        .where(Bank.id == new_bank.id)
+    )
 
+    created_bank = result.scalar_one()
 
-    # bank = Bank(
-    #     name=bank_data.name,
-    #     short_code=bank_data.short_code,
-    #     default_tat_days=bank_data.default_tat_days,
-    #     description=bank_data.description,
-    #     status=bank_data.status,
-    #     logo_url=bank_data.logo_url,
-    #     category_id=bank_data.category_id
-    # )
-
-    # # Attach Loan Types
-    # if bank_data.loan_type_ids:
-    #     result = await session.execute(
-    #         select(LoanType).where(LoanType.id.in_(bank_data.loan_type_ids))
-    #     )
-    #     bank.loan_types = list(result.scalars().all())
-
-    # session.add(bank)
-    # await session.commit()
-    # await session.refresh(bank)
-
-    # return bank
-
-
+    return created_bank
 # 🔹 Get All Banks
 async def get_all_banks(session: AsyncSession):
     result = await session.execute(
