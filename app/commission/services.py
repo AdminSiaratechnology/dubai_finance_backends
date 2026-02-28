@@ -396,18 +396,20 @@ async def create_bank(
     # 🔹 Re-fetch with eager loading (VERY IMPORTANT)
     # =====================================================
     result = await session.execute(
-        select(Bank)
-        .options(
-            selectinload(Bank.loan_types),
-            selectinload(Bank.category)
-        )
-        .where(Bank.id == new_bank.id)
+        select(Bank).where(Bank.id == new_bank.id)
     )
 
     created_bank = result.scalar_one()
-
     return created_bank
+
+   
+
+
+
+
 # 🔹 Get All Banks
+
+
 async def get_all_banks(
     
         session: AsyncSession,
@@ -443,10 +445,6 @@ async def get_all_banks(
     stmt = (
         select(Bank)
         .where(*filters)
-        .options(
-            selectinload(Bank.loan_types),
-            selectinload(Bank.category)
-        )
         .order_by(Bank.id.desc())
         .offset((page - 1) * limit)
         .limit(limit)
@@ -473,13 +471,9 @@ async def get_all_banks(
 # 🔹 Get Single Bank
 async def get_bank_by_id(session: AsyncSession, bank_id: int):
     result = await session.execute(
-        select(Bank)
-        .where(Bank.id == bank_id)
-        .options(
-            selectinload(Bank.loan_types),
-            selectinload(Bank.category)
-        )
+        select(Bank).where(Bank.id == bank_id)
     )
+
 
     bank = result.scalar_one_or_none()
 
@@ -500,10 +494,8 @@ async def update_bank(
 
     
     result = await session.execute(
-    select(Bank)
-    .options(selectinload(Bank.loan_types))
-    .where(Bank.id == bank_id)
-)
+        select(Bank).where(Bank.id == bank_id)
+    )
     bank = result.scalar_one_or_none()
 
     if not bank:
