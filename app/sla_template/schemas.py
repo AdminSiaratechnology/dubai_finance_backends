@@ -21,15 +21,23 @@ class SLATemplateBase(BaseModel):
 
 
 
-
-
-
 class SlaTemplateCreate(SLATemplateBase):
     pass
 
 class TemplateOut(SLATemplateBase):
     id: int
-    name: str
+    template_name: str
     model_config = {
         "from_attributes": True
     }
+
+
+
+
+
+class PaginatedSlaTemplateOut(BaseModel):
+    total: int
+    page: int
+    limit: int
+    items: list[TemplateOut]
+

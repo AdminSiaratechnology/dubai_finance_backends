@@ -3,6 +3,7 @@ from app.account.routers import router as account_router
 from app.commission.routers.loan_type import router as loan_type_router
 from app.commission.routers.category import router as category_router
 from app.commission.routers.bank import router as bank_router
+from app.sla_template.routers import router as sla_router
 from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
 from fastapi.staticfiles import StaticFiles
@@ -31,3 +32,4 @@ app.include_router(account_router, prefix="/api/account", tags=["Account"])
 app.include_router(loan_type_router, prefix="/api/loantype", tags=["Loan Type"])
 app.include_router(category_router, prefix="/api/category", tags=["Category"])
 app.include_router(bank_router, prefix="/api/banks", tags=["Banks"])
+app.include_router(sla_router, prefix="/api/slatemplate", tags=["SLA Template"])

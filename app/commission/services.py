@@ -9,7 +9,8 @@ from sqlalchemy.exc import IntegrityError
 
 from app.commission.utils import save_upload_file
 
-################# Loan Type ###################
+################# Loan Type ######################################################
+
 async def create_loan_type(session: AsyncSession, loantype:LoanCreate) -> LoanTypeOut:
   # 🔎 Check if already exists
   result = await session.execute(
