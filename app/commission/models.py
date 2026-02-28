@@ -38,9 +38,10 @@ class Bank(Base):
 
   category: Mapped["BankCategory"] = relationship(
         "BankCategory",
-        back_populates="banks"
+        back_populates="banks",
+        lazy="selectin"
     )
-  loan_types: Mapped[list["LoanType"]] = relationship("LoanType", secondary=loantype_bank_table, back_populates="banks")
+  loan_types: Mapped[list["LoanType"]] = relationship("LoanType", secondary=loantype_bank_table, back_populates="banks", lazy="selectin")
   
 
 
@@ -63,6 +64,10 @@ class LoanType(Base):
     )
 
   banks: Mapped[list["Bank"]] = relationship("Bank", secondary=loantype_bank_table, back_populates="loan_types")
+
+  created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable= True)
+  updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc), nullable=True)
+
 
 
 
@@ -94,3 +99,8 @@ class BankCategory(Base):
         "Bank",
         back_populates="category"
     )
+
+    
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable= True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc), nullable=True)
+
