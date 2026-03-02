@@ -24,7 +24,7 @@ class ProductBase(BaseModel):
     # Foreign Keys
     bank_id: int
     loan_type_id: int
-    default_sla_template: int
+    sla_template_id: int
 
     # Loan Limits & Tenure
     min_loan_amount: float = Field(ge=0)

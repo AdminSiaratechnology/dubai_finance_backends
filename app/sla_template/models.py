@@ -37,3 +37,9 @@ class SLATemplate(Base):
         onupdate=func.now(),
         nullable=False
     )
+
+    products: Mapped[list["Product"]] = relationship(
+    "Product",
+    back_populates="sla_template",
+    lazy="selectin"
+)

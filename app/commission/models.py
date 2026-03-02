@@ -4,7 +4,11 @@ from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Table, Colu
 from app.db.base import Base
 from datetime import datetime, timezone
 
+
 from app.commission.schemas import LoanStatus 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from app.product.models import Product
 
 
 loantype_bank_table = Table(
@@ -32,6 +36,8 @@ class Bank(Base):
     )
   logo_url: Mapped[str] = mapped_column(String(255), nullable=True)
   category_id: Mapped[int] = mapped_column(Integer, ForeignKey("bank_categories.id", ondelete="SET NULL"), nullable=True)
+#   products = relationship("Product", back_populates="bank", cascade="all, delete")
+ 
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
   updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc))
 
@@ -42,6 +48,13 @@ class Bank(Base):
         lazy="selectin"
     )
   loan_types: Mapped[list["LoanType"]] = relationship("LoanType", secondary=loantype_bank_table, back_populates="banks", lazy="selectin")
+
+  products: Mapped[list["Product"]] = relationship(
+    "Product",
+    back_populates="bank",
+    cascade="all, delete-orphan",
+    lazy="selectin"
+)
   
 
 
@@ -64,6 +77,11 @@ class LoanType(Base):
     )
 
   banks: Mapped[list["Bank"]] = relationship("Bank", secondary=loantype_bank_table, back_populates="loan_types")
+  products: Mapped[list["Product"]] = relationship(
+    "Product",
+    back_populates="loan_type",
+    lazy="selectin"
+)
 
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable= True)
   updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc), nullable=True)
