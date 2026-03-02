@@ -149,6 +149,17 @@ async def update_loan_type(
     return loan_type
 
 
+# Delete Loan Type
+async def delete_loan_type(
+    session: AsyncSession,
+    loan_type_id: int
+):
+    loan_type = await get_loan_type_by_id(session, loan_type_id)
+
+    await session.delete(loan_type)
+    await session.commit()
+
+    return {"message": "Loan type deleted successfully"}
 
 ################# Bank Category ###################
 
@@ -303,6 +314,17 @@ async def update_category(
 
 
 
+# ✅ Delete Category
+async def delete_category(
+    session: AsyncSession,
+    category_id: int
+):
+    category = await get_category_by_id(session, category_id)
+
+    await session.delete(category)
+    await session.commit()
+
+    return {"message": "Category deleted successfully"}
 
 
 

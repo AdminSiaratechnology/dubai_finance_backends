@@ -3,7 +3,7 @@ from app.account.deps import require_admin
 from app.account.models import User
 from app.db.config import SessionDep
 from app.commission.schemas import LoanCreate,LoanTypeOut,PaginatedProductOut,LoanStatus
-from app.commission.services import create_loan_type,get_all_loan_type,get_loan_type_by_id,update_loan_type
+from app.commission.services import create_loan_type,get_all_loan_type,get_loan_type_by_id,update_loan_type, delete_loan_type
 from typing import Optional
 
 router = APIRouter()
@@ -44,3 +44,17 @@ async def update_loan(
     admin_user: User = Depends(require_admin)
 ):
     return await update_loan_type(session, loan_type_id, data)
+
+
+# Delete Loan Type
+@router.delete("/{loan_type_id}")
+async def delete_loantype(
+    loan_type_id : int,
+    session: SessionDep,
+    admin_user: User = Depends(require_admin)
+
+):
+    result = await delete_loan_type(session, loan_type_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Loan Type not found")
+    return result

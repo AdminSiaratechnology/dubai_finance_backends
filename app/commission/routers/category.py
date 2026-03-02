@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 
 from app.account.deps import require_admin
@@ -12,6 +12,7 @@ from app.commission.schemas import (
 )
 from app.commission.services import (
     create_category,
+    delete_category,
     get_all_categories,
     get_category_by_id,
     update_category
@@ -72,3 +73,16 @@ async def category_update(
         category_id,
         category
     )
+
+
+# Delete Category
+@router.delete("/{category_id}")
+async def category_delete(
+    category_id: int,
+    session: SessionDep,
+    admin_user: User = Depends(require_admin)   
+):
+    result = await delete_category(session, category_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return result
