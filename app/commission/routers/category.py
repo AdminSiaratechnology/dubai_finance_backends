@@ -38,7 +38,10 @@ async def category_list(
     page: int = Query(1, ge=1),
     limit: int = Query(10, le=100),
     search: Optional[str] = None,
-    status: Optional[LoanStatus] = LoanStatus.active,
+    status: Optional[LoanStatus] = Query(
+        None,   # 👈 changed from LoanStatus.active
+        description="Filter by loan status"
+    ),
     admin_user: User = Depends(require_admin)
 ):
     return await get_all_categories(
@@ -85,4 +88,4 @@ async def category_delete(
     result = await delete_category(session, category_id)
     if not result:
         raise HTTPException(status_code=404, detail="Category not found")
-    return result
+    

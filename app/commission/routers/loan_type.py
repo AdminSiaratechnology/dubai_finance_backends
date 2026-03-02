@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status,Query
 from app.account.deps import require_admin
 from app.account.models import User
 from app.db.config import SessionDep
-from app.commission.schemas import LoanCreate,LoanTypeOut,PaginatedProductOut,LoanStatus
+from app.commission.schemas import LoanCreate,LoanTypeOut,PaginatedProductOut,LoanStatus    
 from app.commission.services import create_loan_type,get_all_loan_type,get_loan_type_by_id,update_loan_type, delete_loan_type
 from typing import Optional
 
@@ -20,7 +20,10 @@ async def list_loantype(
     page: int = Query(1, ge=1),
     limit: int = Query(5, ge=1),
     search: Optional[str] = Query(None),
-    status: Optional[LoanStatus] = Query(LoanStatus.active, description="Filter by loan status"),
+    status: Optional[LoanStatus] = Query(
+        None,   # 👈 changed from LoanStatus.active
+        description="Filter by loan status"
+    ),
     admin_user: User = Depends(require_admin)
     
 ):

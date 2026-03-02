@@ -52,7 +52,8 @@ async def get_all_sla_template(
     page: int = 1,
     limit: int = 10,
     search: Optional[str] = None,
-    status: Optional[SLAStatus] = SLAStatus.ACTIVE
+    status: Optional[SLAStatus] = None
+    
 ):
 
     page = max(page, 1)

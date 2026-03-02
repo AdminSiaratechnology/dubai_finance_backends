@@ -29,13 +29,12 @@ async def create_loan_type(session: AsyncSession, loantype:LoanCreate) -> LoanTy
   return loantype
 
 
-
 async def get_all_loan_type(
     session: AsyncSession,
     page: int = 1,
     limit: int = 10,
     search: Optional[str] = None,
-    status: Optional[LoanStatus] = LoanStatus.active  # new
+    status: Optional[LoanStatus] = None  # 👈 changed
 ):
     # Safety checks
     page = max(page, 1)
@@ -44,18 +43,22 @@ async def get_all_loan_type(
     filters = []
 
     # 🔎 Search filter
-    if search:
+    if search and search.strip():
         filters.append(LoanType.name.ilike(f"%{search.strip()}%"))
 
-    # 🔹 Status filter
-    if status:
+    # 🔹 Status filter (only if provided)
+    if status is not None:
         filters.append(LoanType.status == status)
 
     # ✅ Total count
-    count_stmt = select(func.count(LoanType.id)).where(*filters)
+    count_stmt = select(func.count()).select_from(LoanType)
+
+    if filters:
+        count_stmt = count_stmt.where(*filters)
+
     total = (await session.execute(count_stmt)).scalar_one()
 
-    # Early return if no data
+    # Early return
     if total == 0:
         return {
             "total": 0,
@@ -64,11 +67,14 @@ async def get_all_loan_type(
             "items": [],
         }
 
-    # ✅ Main query with ordering & pagination
+    # ✅ Main query
+    stmt = select(LoanType)
+
+    if filters:
+        stmt = stmt.where(*filters)
+
     stmt = (
-        select(LoanType)
-        .where(*filters)
-        .order_by(LoanType.id.desc())
+        stmt.order_by(LoanType.id.desc())
         .offset((page - 1) * limit)
         .limit(limit)
     )
@@ -82,8 +88,6 @@ async def get_all_loan_type(
         "limit": limit,
         "items": items,
     }
-
-
 
 ################# Get Loan Type By ID ###################
 
@@ -201,7 +205,8 @@ async def get_all_categories(
     page: int = 1,
     limit: int = 10,
     search: Optional[str] = None,
-    status: Optional[LoanStatus] = LoanStatus.active
+    # status: Optional[LoanStatus] = LoanStatus.active
+    status: Optional[LoanStatus] = None 
 ):
 
     page = max(page, 1)

@@ -29,7 +29,11 @@ async def sla_template_list(
     page: int = Query(1, ge=1),
     limit: int = Query(10, le=100),
     search: Optional[str] = None,
-    status: Optional[SLAStatus] = SLAStatus.ACTIVE,
+    # status: Optional[SLAStatus] = SLAStatus.ACTIVE,
+    status: Optional[SLAStatus] = Query(
+        None,   # 👈 changed from LoanStatus.active
+        description="Filter by loan status"
+    ),
     admin_user: User = Depends(require_admin)
 ):
     return await get_all_sla_template(
