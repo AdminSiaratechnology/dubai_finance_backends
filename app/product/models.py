@@ -4,10 +4,12 @@ from app.db.base import Base
 from app.product.schemas import CustomerSegment,ProductStatus
 from sqlalchemy.orm import relationship,Mapped
 
-from app.sla_template.models import SLATemplate
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from app.commission.models import Bank, LoanType
+    from app.loantype.models import Bank, LoanType
+    from app.sla_template.models import SLATemplate
+    
     
 
 

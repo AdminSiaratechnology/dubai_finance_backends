@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.product.schemas import ProductOut, ProductCreate, ProductStatus
 from sqlalchemy import select, func, and_, or_
 from app.product.models import Product
-from app.commission.models import Bank, LoanType
+from app.Bank.models import Bank
+from app.loantype.models import LoanType
 from app.sla_template.models import SLATemplate
 from typing import Optional
 from sqlalchemy.orm import selectinload

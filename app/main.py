@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from app.account.routers import router as account_router
-from app.commission.routers.loan_type import router as loan_type_router
-from app.commission.routers.category import router as category_router
-from app.commission.routers.bank import router as bank_router
+from app.loantype.routers.loan_type import router as loan_type_router
+from app.category.routers import router as category_router
+from app.Bank.routers import router as bank_router
 from app.sla_template.routers import router as sla_router
 from app.product.routers import router as product_router
 from fastapi.middleware.cors import CORSMiddleware

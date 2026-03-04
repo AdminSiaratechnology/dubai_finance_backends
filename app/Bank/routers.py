@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends,UploadFile,File,Form,HTTPException,status
 from typing import List, Annotated, Optional
 from app.account.deps import require_admin,User
 from app.db.config import SessionDep
-from app.commission.schemas import BankCreate, BankOut, BankUpdate, LoanStatus, PaginatedBankOut
+from app.loantype.schemas import  LoanStatus
+from app.Bank.schemas import  BankCreate, BankOut, BankUpdate, PaginatedBankOut
 
-
-from app.commission.services import (
+from app.Bank.services import (
     create_bank,
     get_all_banks,
     get_bank_by_id,

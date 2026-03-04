@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 import enum
-from app.commission.schemas import BankLite, LoanTypeLite
+from app.loantype.schemas import BankLite, LoanTypeLite
 from app.sla_template.schemas import SLATemplateLite
 from typing import Optional,List
 

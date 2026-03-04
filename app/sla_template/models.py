@@ -3,7 +3,7 @@ from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Table, Colu
 from app.db.base import Base
 from datetime import datetime, timezone
 from app.sla_template.schemas import SLAStatus
-
+from app.product.models import Product
 
 class SLATemplate(Base):
     __tablename__ = "sla_templates"

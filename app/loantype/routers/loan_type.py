@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status,Query
 from app.account.deps import require_admin
 from app.account.models import User
 from app.db.config import SessionDep
-from app.commission.schemas import LoanCreate,LoanTypeOut,PaginatedProductOut,LoanStatus    
-from app.commission.services import create_loan_type,get_all_loan_type,get_loan_type_by_id,update_loan_type, delete_loan_type
+from app.loantype.schemas import LoanCreate,LoanTypeOut,PaginatedProductOut,LoanStatus    
+from app.loantype.services import create_loan_type,get_all_loan_type,get_loan_type_by_id,update_loan_type, delete_loan_type
 from typing import Optional
 
 router = APIRouter()

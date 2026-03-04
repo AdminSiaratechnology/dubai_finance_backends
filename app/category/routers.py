@@ -4,13 +4,14 @@ from typing import Optional
 from app.account.deps import require_admin
 from app.account.models import User
 from app.db.config import SessionDep
-from app.commission.schemas import (
+
+from app.category.schemas import (
     CategoryCreate,
     CategoryOut,
-    PaginatedProductOut,
+    PaginatedCategoryOut,
     LoanStatus
 )
-from app.commission.services import (
+from app.category.services import (
     create_category,
     delete_category,
     get_all_categories,
@@ -32,7 +33,7 @@ async def category_create(
 
 
 # ✅ Get All Categories
-@router.get("", response_model=PaginatedProductOut)
+@router.get("", response_model=PaginatedCategoryOut)
 async def category_list(
     session: SessionDep,
     page: int = Query(1, ge=1),
