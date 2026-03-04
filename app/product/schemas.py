@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 import enum
-
+from app.commission.schemas import BankLite, LoanTypeLite
+from app.sla_template.schemas import SLATemplateLite
 from typing import Optional,List
 
 
@@ -22,9 +23,7 @@ class ProductBase(BaseModel):
     customer_segment: CustomerSegment
 
     # Foreign Keys
-    bank_id: int
-    loan_type_id: int
-    sla_template_id: int
+    
 
     # Loan Limits & Tenure
     min_loan_amount: float = Field(ge=0)
@@ -42,12 +41,33 @@ class ProductBase(BaseModel):
 
 
 class ProductCreate(ProductBase):
-    pass
+    bank_id: int
+    loan_type_id: int
+    sla_template_id: int
 
 
 class ProductOut(ProductBase):
     id: int
+    # 🔥 Nested objects instead of IDs
+    bank: BankLite
+    loan_type: LoanTypeLite
+    sla_template: SLATemplateLite
    
     model_config = {
         "from_attributes": True
     }
+
+
+
+
+
+class PaginatedProductOut(BaseModel):
+    total: int
+    page: int
+    limit: int
+    items: list[ProductOut]
+
+
+
+
+

@@ -117,3 +117,19 @@ class PaginatedBankOut(BaseModel):
     limit: int
     items: list[BankOut]
 
+
+
+# ------------------------------------- Fetch data for product schema -----------------
+
+class BankLite(BaseModel):
+    id: int
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
+class LoanTypeLite(BaseModel):
+    id: int
+    name: str
+
+    model_config = {"from_attributes": True}

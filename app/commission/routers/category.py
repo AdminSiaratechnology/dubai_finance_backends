@@ -88,4 +88,5 @@ async def category_delete(
     result = await delete_category(session, category_id)
     if not result:
         raise HTTPException(status_code=404, detail="Category not found")
+    return result
     

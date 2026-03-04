@@ -41,3 +41,14 @@ class PaginatedSlaTemplateOut(BaseModel):
     limit: int
     items: list[TemplateOut]
 
+
+
+
+# ------------------------------------- Fetch data for product schema -----------------
+
+
+class SLATemplateLite(BaseModel):
+    id: int
+    template_name: str
+
+    model_config = {"from_attributes": True}
