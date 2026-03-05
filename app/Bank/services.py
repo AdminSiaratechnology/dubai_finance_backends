@@ -8,6 +8,7 @@ from app.category.models import BankCategory
 from app.loantype.schemas import LoanStatus
 from typing import Optional
 from app.loantype.utils import save_upload_file
+from app.product.models import Product
 # ------------------------------Bank-------------------------------------------- 
 
 
@@ -277,3 +278,28 @@ async def delete_bank(session: AsyncSession, bank_id: int):
     await session.commit()
 
     return {"message": "Bank deleted successfully"}
+
+
+# product show bank id wise
+async def get_products_by_bank_service(
+    session: AsyncSession,
+    bank_id: int
+):
+
+    query = (
+        select(Product.id, Product.product_name)
+        .where(Product.bank_id == bank_id)
+        .order_by(Product.product_name)
+    )
+
+    result = await session.execute(query)
+
+    products = result.all()
+
+    return [
+        {
+            "id": p.id,
+            "product_name": p.product_name
+        }
+        for p in products
+    ]

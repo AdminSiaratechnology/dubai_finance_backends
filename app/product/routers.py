@@ -6,8 +6,6 @@ from app.product.schemas import ProductOut, ProductCreate,PaginatedProductOut, P
 from app.product.services import product_create, get_all_products, get_product_by_id, update_product, delete_product
 
 
-
-
 router = APIRouter()
 
 @router.post("/", response_model=ProductOut)

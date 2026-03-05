@@ -10,6 +10,7 @@ if TYPE_CHECKING:
   from app.loantype.models import LoanType
   from app.category.models import BankCategory
   from app.product.models import Product
+  from app.commission.models import Commission
 class Bank(Base):
   __tablename__ = "banks"
 
@@ -45,4 +46,5 @@ class Bank(Base):
     cascade="all, delete-orphan",
     lazy="selectin"
 )
+  commissions: Mapped[list["Commission"]] = relationship(back_populates="bank",  lazy="selectin")
   

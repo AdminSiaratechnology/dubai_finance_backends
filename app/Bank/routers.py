@@ -4,13 +4,15 @@ from app.account.deps import require_admin,User
 from app.db.config import SessionDep
 from app.loantype.schemas import  LoanStatus
 from app.Bank.schemas import  BankCreate, BankOut, BankUpdate, PaginatedBankOut
+from app.product.schemas import ProductLite
 
 from app.Bank.services import (
     create_bank,
     get_all_banks,
     get_bank_by_id,
     update_bank,
-    delete_bank
+    delete_bank,
+    get_products_by_bank_service
 )
 
 router = APIRouter()
@@ -108,6 +110,17 @@ async def bank_update(
 @router.delete("/{bank_id}")
 async def delete_bank_api(
     bank_id: int,
-    session: SessionDep
+    session: SessionDep,
+    admin_user: User = Depends(require_admin)
 ):
     return await delete_bank(session, bank_id)
+
+
+# product show bank id wise
+@router.get("/{bank_id}/products", response_model=list[ProductLite])
+async def get_products_by_bank(
+    bank_id: int,
+    session: SessionDep,
+    admin_user: User = Depends(require_admin)
+):
+    return await get_products_by_bank_service(session, bank_id)

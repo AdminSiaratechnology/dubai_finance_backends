@@ -40,6 +40,7 @@ class ProductBase(BaseModel):
     status: ProductStatus = ProductStatus.active
 
 
+
 class ProductCreate(ProductBase):
     bank_id: int
     loan_type_id: int
@@ -69,5 +70,13 @@ class PaginatedProductOut(BaseModel):
 
 
 
+
+
+
+class ProductLite(BaseModel):
+    id: int
+    product_name: str
+
+    model_config = {"from_attributes": True}
 
 

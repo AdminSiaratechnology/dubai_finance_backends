@@ -13,7 +13,6 @@ router = APIRouter()
 async def loan_type_create(session: SessionDep, loantypecreate: LoanCreate, admin_user: User = Depends(require_admin)):
   return await create_loan_type(session, loantypecreate)
 
-
 @router.get("", response_model=PaginatedProductOut)
 async def list_loantype(
     session: SessionDep,

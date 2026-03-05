@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.loantype.models import Bank, LoanType
     from app.sla_template.models import SLATemplate
+    from app.commission.models import Commission
     
     
-
 
 class Product(Base):
     __tablename__ = "products"
@@ -54,4 +54,10 @@ class Product(Base):
         "SLATemplate",
         back_populates="products"
     )
+    # commissions: Mapped[list["Commission"]] = relationship(back_populates="products",  lazy="selectin")
+    commissions: Mapped[list["Commission"]] = relationship(
+    "Commission",
+    back_populates="product",
+    lazy="selectin"
+)
     
