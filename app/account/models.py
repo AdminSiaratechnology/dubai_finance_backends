@@ -44,7 +44,7 @@ class User(Base):
     admin_profile = relationship("AdminProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     agent_profile = relationship("AgentProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     telecaller_profile = relationship("TelecallerProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    coordinator_profile = relationship("CoordinatorProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    coordinator_profile = relationship("CoordinatorProfile", back_populates="user", lazy="selectin" ,uselist=False, cascade="all, delete-orphan")
 
 
 # ---------------- ADMIN ----------------
@@ -92,7 +92,7 @@ class TelecallerProfile(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
-
+    name: Mapped[str] = mapped_column(String(50), nullable=True)
     target_calls: Mapped[int] = mapped_column(Integer)
     shift_time: Mapped[str] = mapped_column(String(50))
     reporting_manager: Mapped[str] = mapped_column(String(100))
@@ -106,10 +106,16 @@ class CoordinatorProfile(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
-
+    name: Mapped[str] = mapped_column(String(50), nullable=True)
     phone: Mapped[str] = mapped_column(String(15))
-    region: Mapped[str] = mapped_column(String(100))
-    team_size: Mapped[int] = mapped_column(Integer)
+    emirates_id: Mapped[str] = mapped_column(String(100), unique=True)
+    nationality: Mapped[str] = mapped_column(String(100))
+    experience: Mapped[int] = mapped_column(Integer)
+    account_holder_name: Mapped[str] = mapped_column(String)
+    bank_name: Mapped[str] = mapped_column(String(100))
+    account_number: Mapped[str] = mapped_column(String)
+    iban: Mapped[str] = mapped_column(String(100))
+    
 
     user = relationship("User", back_populates="coordinator_profile")
 

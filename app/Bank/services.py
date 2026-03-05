@@ -154,12 +154,7 @@ async def get_all_banks(
         .limit(limit)
     )
     result = await session.execute(stmt)
-    # result = await session.execute(
-    #     select(Bank).options(
-    #         selectinload(Bank.loan_types),
-    #         selectinload(Bank.category)
-    #     )
-    # )
+   
     
     banks = result.scalars().all()
 

@@ -12,6 +12,7 @@ from typing import Optional
 async def check_email_exists(email: str, db: AsyncSession):
     result = await db.execute(select(User).where(User.email == email))
     return result.scalar_one_or_none()
+
 async def register_admin_service(data: AdminRegister, db: AsyncSession):
 
     if await check_email_exists(data.email, db):
@@ -174,3 +175,7 @@ async def get_user_with_profile(
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
+
+
+
+
