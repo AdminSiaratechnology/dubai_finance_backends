@@ -7,6 +7,7 @@ from app.sla_template.routers import router as sla_router
 from app.product.routers import router as product_router
 from app.commission.routers import router as commission_router
 from app.account.analyst.routers import router as analyst_router
+from app.account.telecaller.routers import router as telecaller_router
 from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
 from fastapi.staticfiles import StaticFiles
@@ -39,3 +40,4 @@ app.include_router(sla_router, prefix="/api/slatemplate", tags=["SLA Template"])
 app.include_router(product_router, prefix="/api/product", tags=["Products"])
 app.include_router(commission_router, prefix="/api/commission", tags=["Commission"])
 app.include_router(analyst_router, prefix="/api/coordinators", tags=["Coordinators"])
+app.include_router(telecaller_router, prefix ="/api/telecaller", tags=["Telecallers"])

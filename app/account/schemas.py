@@ -100,7 +100,43 @@ class AdminProfileResponse(AdminProfileBase):
         from_attributes = True
 
 
+class TelecallerProfileResponse(BaseModel):
+    id: int
+    user_id: int
+    name : str
+    emirates_id: str
+    phone: str
+    nationality: str
+    account_holder_name: str
+    bank_name: str
+    account_number: str
+    iban: str
+    experience: int
+
+    
+    
+
+    class Config:
+        from_attributes = True
 
 
+class CoordinatorProfileResponse(BaseModel):
+    id: int
+    user_id: int
+    name : str
+    emirates_id: str
+    phone: str
+    nationality: str
+    account_holder_name: str
+    bank_name: str
+    account_number: str
+    iban: str
+    experience: int
+
+    
+    
+
+    class Config:
+        from_attributes = True
 
 # ---------------------------------------------------- Profile Schema --------------------------------------
