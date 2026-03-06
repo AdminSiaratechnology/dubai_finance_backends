@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status
 from app.account.utils import hash_password, verify_password, get_user_by_email, create_password_reset_token,verify_email_token_and_get_user_id,send_email
-from app.account.schemas import AdminRegister,UserLogin,UserResponse,AdminProfileResponse,PasswordChangeRequest,PasswordResetEmailRequest,PasswordResetRequest
+from app.account.schemas import AdminRegister,UserLogin,UserResponse,AdminProfileResponse,TelecallerProfileResponse,CoordinatorProfileResponse,PasswordChangeRequest,PasswordResetEmailRequest,PasswordResetRequest
 from sqlalchemy.orm import selectinload
 from typing import Optional
 
@@ -148,10 +148,8 @@ async def verify_password_reset_token(session: AsyncSession, data: PasswordReset
 class UserWithProfile(UserResponse):
     admin_profile: Optional[AdminProfileResponse] = None
     # agent_profile: Optional[AgentProfileResponse] = None
-    # telecaller_profile: Optional[TelecallerProfileResponse] = None
-    # coordinator_profile: Optional[CoordinatorProfileResponse] = None
-
-
+    telecaller_profile: Optional[TelecallerProfileResponse] = None
+    coordinator_profile: Optional[CoordinatorProfileResponse] = None
 
 async def get_user_with_profile(
     session: AsyncSession,
@@ -162,8 +160,8 @@ async def get_user_with_profile(
         .options(
             selectinload(User.admin_profile),
             # selectinload(User.agent_profile),
-            # selectinload(User.telecaller_profile),
-            # selectinload(User.coordinator_profile),
+            selectinload(User.telecaller_profile),
+            selectinload(User.coordinator_profile),
         )
         .where(User.id == user_id)
     )

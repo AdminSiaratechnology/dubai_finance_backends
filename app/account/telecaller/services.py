@@ -1,70 +1,69 @@
-from app.account.models import User, UserRole, CoordinatorProfile
+from app.account.models import User, UserRole, TelecallerProfile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select,func, or_
 from fastapi import HTTPException, status
-from app.account.analyst.schemas import CoordinatorCreate, CoordinatorOut,CoordinatorStatus
+from app.account.telecaller.schemas import TelecallerCreate, TelecallerOut,TelecallerStatus, TelecallerUpdate
 from app.account.services import check_email_exists
 from app.account.utils import hash_password
 from typing import Optional
 
 async def check_emirates_id_exists(emirates_id: str, db: AsyncSession):
     result = await db.execute(
-        select(CoordinatorProfile).where(
-            CoordinatorProfile.emirates_id == emirates_id
+        select(TelecallerProfile).where(
+            TelecallerProfile.emirates_id == emirates_id
         )
     )
     return result.scalar_one_or_none()
 
-async def create_coordinator(
+async def create_telecaller(
     session: AsyncSession,
-    coordinator: CoordinatorCreate
-) -> CoordinatorOut:
+    telecaller: TelecallerCreate,
+) -> TelecallerOut:
 
-    # 1️⃣ check email exists
-    if await check_email_exists(coordinator.email, session):
+    if await check_email_exists(telecaller.email, session):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already exists"
         )
-    # check emirates id
-    if await check_emirates_id_exists(coordinator.emirates_id, session):
+    
+    if await check_emirates_id_exists(telecaller.emirates_id, session):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Emirates ID already exists"
         )
-
+    
     try:
         # 2️⃣ create user
         user = User(
-            email=coordinator.email,
-            password_hash=hash_password(coordinator.password),
-            role=UserRole.COORDINATOR
+            email=telecaller.email,
+            password_hash=hash_password(telecaller.password),
+            role=UserRole.TELECALLER
         )
 
         session.add(user)
         await session.flush()   # user.id generate
 
-        # 3️⃣ create coordinator profile
-        profile = CoordinatorProfile(
+        # 3️⃣ create telecaller profile
+        profile = TelecallerProfile(
             user_id=user.id,
-            name=coordinator.name,
-            phone=coordinator.phone,
-            emirates_id=coordinator.emirates_id,
-            nationality=coordinator.nationality,
-            experience=coordinator.experience,
-            account_holder_name=coordinator.account_holder_name,
-            bank_name=coordinator.bank_name,
-            account_number=coordinator.account_number,
-            iban=coordinator.iban
+            name=telecaller.name,
+            phone=telecaller.phone,
+            emirates_id=telecaller.emirates_id,
+            nationality=telecaller.nationality,
+            experience=telecaller.experience,
+            account_holder_name=telecaller.account_holder_name,
+            bank_name=telecaller.bank_name,
+            account_number=telecaller.account_number,
+            iban=telecaller.iban
         )
 
         session.add(profile)
 
         await session.commit()
 
-        return CoordinatorOut(
+        return TelecallerOut(
             id=user.id,
-            name=coordinator.name,
+            name=telecaller.name,
             email=user.email,
             phone=profile.phone,
             emirates_id=profile.emirates_id,
@@ -74,7 +73,7 @@ async def create_coordinator(
             bank_name=profile.bank_name,
             account_number=profile.account_number,  
             iban=profile.iban,
-            status=coordinator.status,
+            status=telecaller.status,
             created_at=user.created_at,
             updated_at=user.updated_at
         )
@@ -86,47 +85,38 @@ async def create_coordinator(
             detail=str(e)
         )
 
-
-async def allcoordinator(
+async def alltelecaller(
     session: AsyncSession,
     page: int = 1,
     limit: int = 10,
     search: Optional[str] = None,
     status: Optional[str] = None
 ):
-
-    # ✅ Safety checks
-    page = max(page, 1)
+    page = max(page,1)
     limit = max(min(limit, 100), 1)
-
     filters = []
 
-    # 🔎 Search filter
     if search:
-        search = search.strip()
-
+        search= search.strip()
         filters.append(
             or_(
                 User.email.ilike(f"%{search}%"),
-                CoordinatorProfile.phone.ilike(f"%{search}%"),
-                CoordinatorProfile.account_holder_name.ilike(f"%{search}%")
+                TelecallerProfile.phone.ilike(f"%{search}%"),
+                TelecallerProfile.account_holder_name.ilike(f"%{search}%")
             )
         )
-
-    # 🔹 Status filter
+        
     if status == "active":
         filters.append(User.is_active == True)
-
     elif status == "inactive":
         filters.append(User.is_active == False)
-
-    # ✅ Total count
+    
     count_stmt = (
         select(func.count(User.id))
-        .join(CoordinatorProfile)
+        .join(TelecallerProfile)
         .where(*filters)
     )
-
+    
     total = (await session.execute(count_stmt)).scalar_one()
 
     if total == 0:
@@ -137,13 +127,12 @@ async def allcoordinator(
             "items": []
         }
 
-    # ✅ Main query with pagination
     stmt = (
         select(User)
-        .join(CoordinatorProfile)
+        .join(TelecallerProfile)
         .where(*filters)
         .order_by(User.id.desc())
-        .offset((page - 1) * limit)
+        .offset((page-1) * limit)
         .limit(limit)
     )
 
@@ -154,11 +143,11 @@ async def allcoordinator(
     items = []
 
     for user in users:
-        profile = user.coordinator_profile
+        profile = user.telecaller_profile
 
         items.append({
             "id": user.id,
-            "name": profile.name if profile else None,
+            "name": profile.account_holder_name if profile else None,
             "email": user.email,
             "phone": profile.phone if profile else None,
             "emirates_id": profile.emirates_id if profile else None,
@@ -180,20 +169,16 @@ async def allcoordinator(
         "items": items
     }
 
-
-
-
-async def get_coordinator_by_id(
-    session: AsyncSession,
-    coordinator_id: int
+async def get_telecaller_by_id(
+    session:AsyncSession,
+    telecaller_id: int
 ):
-
     stmt = (
         select(User)
-        .join(CoordinatorProfile)
+        .join(TelecallerProfile)
         .where(
-            User.id == coordinator_id,
-            User.role == UserRole.COORDINATOR
+            User.id == telecaller_id,
+            User.role == UserRole.TELECALLER
         )
     )
 
@@ -204,14 +189,14 @@ async def get_coordinator_by_id(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Coordinator not found"
+            detail="Telecaller not found"
         )
 
-    profile = user.coordinator_profile
+    profile = user.telecaller_profile
 
     return {
         "id": user.id,
-        "name": profile.name if profile else None,
+        "name": profile.account_holder_name if profile else None,
         "email": user.email,
         "phone": profile.phone if profile else None,
         "emirates_id": profile.emirates_id if profile else None,
@@ -226,34 +211,22 @@ async def get_coordinator_by_id(
         "updated_at": user.updated_at
     }
 
-
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
-
-from app.account.models import User, CoordinatorProfile, UserRole
-from app.account.services import check_email_exists
-from app.account.analyst.schemas import CoordinatorUpdate
-
-
-async def update_coordinator(
+async def update_telecaller(
     session: AsyncSession,
-    coordinator_id: int,
-    data:CoordinatorUpdate
+    telecaller_id: int,
+    data: TelecallerUpdate
 ):
 
     stmt = (
         select(User)
-        .join(CoordinatorProfile)
+        .join(TelecallerProfile)
         .where(
-            User.id == coordinator_id,
-            User.role == UserRole.COORDINATOR
+            User.id == telecaller_id,
+            User.role == UserRole.TELECALLER
         )
     )
 
     result = await session.execute(stmt)
-
     user = result.scalar_one_or_none()
 
     if not user:
@@ -261,22 +234,19 @@ async def update_coordinator(
             status_code=404,
             detail="Coordinator not found"
         )
+    profile = user.telecaller_profile
 
-    profile = user.coordinator_profile
-
-    # 🔹 Email duplicate check
     if data.email != user.email:
         if await check_email_exists(data.email, session):
             raise HTTPException(
                 status_code=400,
                 detail="Email already exists"
             )
-
-    # 🔹 Emirates ID duplicate check
+    
     emirates_check = await session.execute(
-        select(CoordinatorProfile).where(
-            CoordinatorProfile.emirates_id == data.emirates_id,
-            CoordinatorProfile.user_id != coordinator_id
+        select(TelecallerProfile).where(
+            TelecallerProfile.emirates_id == data.emirates_id,
+            TelecallerProfile.user_id != telecaller_id
         )
     )
 
@@ -285,17 +255,13 @@ async def update_coordinator(
             status_code=400,
             detail="Emirates ID already exists"
         )
-
-    # ---------------- USER UPDATE ----------------
-
+        
     user.email = data.email
 
     if data.status == "active":
         user.is_active = True
     else:
         user.is_active = False
-
-    # ---------------- PROFILE UPDATE ----------------
 
     profile.name = data.name
     profile.phone = data.phone
@@ -328,16 +294,14 @@ async def update_coordinator(
         "updated_at": user.updated_at
     }
 
-
-
-async def delete_coordinator(
+async def delete_telecaller(
     session: AsyncSession,
-    coordinator_id: int
+    telecaller_id: int
 ):
 
-    stmt = select(User).where(
-        User.id == coordinator_id,
-        User.role == UserRole.COORDINATOR
+    stmt= select(User).where(
+        User.id == telecaller_id,
+        User.role == UserRole.TELECALLER
     )
 
     result = await session.execute(stmt)
@@ -347,7 +311,7 @@ async def delete_coordinator(
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="Coordinator not found"
+            detail="Telecaller not found"
         )
 
     await session.delete(user)
@@ -355,5 +319,5 @@ async def delete_coordinator(
     await session.commit()
 
     return {
-        "message": "Coordinator deleted successfully"
+        "message": "Telecaller deleted successfully"
     }
