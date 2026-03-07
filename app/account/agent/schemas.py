@@ -68,6 +68,7 @@ class AgentOut(BaseModel):
     name: str
     email: EmailStr
     phone: str
+    bussiness_name: str
     emirates_id: str
     nationality: str
     experience: int

@@ -88,6 +88,8 @@ async def create_agent(session: AsyncSession, agent_data: AgentCreate):
 
     return {
         "id": agent_profile.id,
+        "user_id": new_user.id, 
+        "bussiness_name": agent_profile.business_name,
         "name": agent_profile.name,
         "email": new_user.email,
         "phone": agent_profile.phone,
@@ -208,6 +210,7 @@ async def get_all_agents(
         items.append({
         "id": agent.id,
         "user_id": agent.user_id,
+        "bussiness_name": agent.business_name,
         "name": agent.name,
         "email": user.email,
         "phone": agent.phone,

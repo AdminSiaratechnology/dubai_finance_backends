@@ -55,7 +55,7 @@ async def get_all_banks_api(
     limit: int = Query(5, ge=1),
     search: Optional[str] = Query(None),
     status: Optional[LoanStatus] = Query(LoanStatus.active, description="Filter by loan status"),
-    admin_user: User = Depends(require_admin)
+    # admin_user: User = Depends(require_admin)
 ):
     return await get_all_banks(session, page, limit, search, status)
 
@@ -121,6 +121,6 @@ async def delete_bank_api(
 async def get_products_by_bank(
     bank_id: int,
     session: SessionDep,
-    admin_user: User = Depends(require_admin)
+    # admin_user: User = Depends(require_admin)
 ):
     return await get_products_by_bank_service(session, bank_id)
