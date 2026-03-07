@@ -236,3 +236,9 @@ async def delete_commission_service(
     return {
         "message": "Commission deleted successfully"
     }
+
+async def get_commission_by_bank_and_bankProduct(session: AsyncSession, bank_id: int, product_id: int):
+    query = select(Commission).where(Commission.bank_id == bank_id, Commission.product_id == product_id)
+    result = await session.execute(query)
+    commission = result.scalar_one_or_none()
+    return commission
