@@ -67,6 +67,7 @@ class AdminProfile(Base):
 
 
 # ---------------- AGENT ----------------
+
 class AgentProfile(Base):
     __tablename__ = "agent_profiles"
 
