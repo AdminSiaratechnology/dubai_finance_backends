@@ -8,7 +8,8 @@ from app.commission.services import (
     get_all_commission,
     get_commission_by_id,
     update_commission_service,
-    delete_commission_service
+    delete_commission_service,
+    get_commission_by_bank_and_bankProduct
 )
 
 
@@ -17,7 +18,7 @@ router = APIRouter()
 
 # Create Commission
 
-@router.post("/", response_model=CommissionOut)
+@router.post("", response_model=CommissionOut)
 async def create_commission(
     session: SessionDep,
     commission: CommissionCreate,
@@ -69,3 +70,12 @@ async def delete_commission(
     admin_user: User = Depends(require_admin)
 ):
     return await delete_commission_service(session, commission_id)
+
+@router.get("/bank/{bank_id}/product/{product_id}", response_model=CommissionOut)
+async def get_commission_by_bank_and_product(
+    bank_id: int,
+    product_id: int,
+    session: SessionDep,
+    admin_user: User = Depends(require_admin)
+):
+    return await get_commission_by_bank_and_bankProduct(session, bank_id, product_id)
