@@ -4,6 +4,10 @@ from app.db.base import Base
 from datetime import datetime, timezone
 import enum
 
+from app.commission.association import agent_commission_table
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from app.commission.models import Commission
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
@@ -69,6 +73,8 @@ class AgentProfile(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True)
 
+    name: Mapped[str] = mapped_column(String(50), nullable=True)
+    phone: Mapped[str] = mapped_column(String(15))
     emirates_id : Mapped[str] = mapped_column(String(100), unique=True, nullable=True)
     nationality: Mapped[str] = mapped_column(String(100))
 
@@ -78,12 +84,19 @@ class AgentProfile(Base):
 
     account_holder_name : Mapped[str] = mapped_column(String(255), nullable=True)
     bank_name : Mapped[str] = mapped_column(String(255), nullable=True)
+    account_number: Mapped[str] = mapped_column(String)
     iban : Mapped[str] = mapped_column(String(255), nullable=True)
 
-    region: Mapped[str] = mapped_column(String(100))
-    team_name: Mapped[str] = mapped_column(String(100))
+    # region: Mapped[str] = mapped_column(String(100))
+    # team_name: Mapped[str] = mapped_column(String(100))
 
     user = relationship("User", back_populates="agent_profile")
+    commissions: Mapped[list["Commission"]] = relationship(
+    "Commission",
+    secondary=agent_commission_table,
+    back_populates="agents",
+    lazy="selectin"
+)
 
 
 # ---------------- TELECALLER ----------------

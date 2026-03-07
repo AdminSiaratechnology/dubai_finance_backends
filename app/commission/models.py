@@ -3,12 +3,14 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
 import enum
 from datetime import datetime, date, timezone
+from app.commission.association import agent_commission_table
 from app.db.base import Base
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.Bank.models import Bank
     from app.product.models import Product
+    from app.account.models import AgentProfile
     
 
 class CommissionTypeEnum(str, enum.Enum):
@@ -69,6 +71,13 @@ class Commission(Base):
     )
 
     product: Mapped["Product"] = relationship(
+        back_populates="commissions",
+        lazy="selectin"
+    )
+
+    agents: Mapped[list["AgentProfile"]] = relationship(
+        "AgentProfile",
+        secondary=agent_commission_table,
         back_populates="commissions",
         lazy="selectin"
     )
