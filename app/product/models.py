@@ -56,8 +56,13 @@ class Product(Base):
     )
     # commissions: Mapped[list["Commission"]] = relationship(back_populates="products",  lazy="selectin")
     commissions: Mapped[list["Commission"]] = relationship(
-    "Commission",
-    back_populates="product",
-    lazy="selectin"
-)
+        "Commission",
+        back_populates="product",
+        lazy="selectin"
+    )
+    # lLeads
+    leads = relationship(
+        "Lead",
+        back_populates="product"
+    )
     

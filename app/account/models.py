@@ -49,6 +49,11 @@ class User(Base):
     agent_profile = relationship("AgentProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     telecaller_profile = relationship("TelecallerProfile", back_populates="user",lazy="selectin", uselist=False, cascade="all, delete-orphan")
     coordinator_profile = relationship("CoordinatorProfile", back_populates="user", lazy="selectin" ,uselist=False, cascade="all, delete-orphan")
+    assigned_leads = relationship(
+        "Lead",
+        foreign_keys="Lead.telecaller_id",
+        lazy="selectin"
+    )
 
 
 # ---------------- ADMIN ----------------
