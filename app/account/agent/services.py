@@ -72,7 +72,7 @@ async def create_agent(session: AsyncSession, agent_data: AgentCreate):
         phone=agent_data.phone,
         emirates_id=agent_data.emirates_id,
         nationality=agent_data.nationality,
-        business_name=agent_data.bussiness_name,
+        business_name=agent_data.business_name,
         year_of_experience=agent_data.year_of_experience,
         account_holder_name=agent_data.account_holder_name,
         bank_name=agent_data.bank_name,
@@ -89,7 +89,7 @@ async def create_agent(session: AsyncSession, agent_data: AgentCreate):
     return {
         "id": agent_profile.id,
         "user_id": new_user.id, 
-        "bussiness_name": agent_profile.business_name,
+        "business_name": agent_profile.business_name,
         "name": agent_profile.name,
         "email": new_user.email,
         "phone": agent_profile.phone,
@@ -210,7 +210,7 @@ async def get_all_agents(
         items.append({
         "id": agent.id,
         "user_id": agent.user_id,
-        "bussiness_name": agent.business_name,
+        "business_name": agent.business_name,
         "name": agent.name,
         "email": user.email,
         "phone": agent.phone,
@@ -289,6 +289,7 @@ async def get_agent_by_id(session: AsyncSession, agent_id: int):
         "emirates_id": agent.emirates_id,
         "nationality": agent.nationality,
         "experience": agent.year_of_experience,
+        "business_name": agent.business_name,
         "account_holder_name": agent.account_holder_name,
         "bank_name": agent.bank_name,
         "account_number": agent.account_number,
@@ -327,6 +328,7 @@ async def update_agent(session: AsyncSession, agent_id: int, payload: AgentUpdat
         "year_of_experience",
         "account_holder_name",
         "bank_name",
+        "business_name",
         "account_number",
         "iban",
     ]

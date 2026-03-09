@@ -159,7 +159,7 @@ async def get_user_with_profile(
         select(User)
         .options(
             selectinload(User.admin_profile),
-            # selectinload(User.agent_profile),
+            selectinload(User.agent_profile),
             selectinload(User.telecaller_profile),
             selectinload(User.coordinator_profile),
         )

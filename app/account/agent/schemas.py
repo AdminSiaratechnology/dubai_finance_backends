@@ -27,7 +27,7 @@ class AgentBase(BaseModel):
     phone: str
     emirates_id: str
     nationality: str
-    bussiness_name: str
+    business_name: str
     year_of_experience: int
     
 
@@ -57,6 +57,7 @@ class AgentUpdate(BaseModel):
     bank_name: Optional[str] = None
     account_number: Optional[str] = None
     iban: Optional[str] = None
+    business_name: Optional[str] = None
 
     status: Optional[str] = None
 
@@ -68,7 +69,7 @@ class AgentOut(BaseModel):
     name: str
     email: EmailStr
     phone: str
-    bussiness_name: str
+    business_name: str
     emirates_id: str
     nationality: str
     experience: int

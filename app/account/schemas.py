@@ -140,3 +140,10 @@ class CoordinatorProfileResponse(BaseModel):
         from_attributes = True
 
 # ---------------------------------------------------- Profile Schema --------------------------------------
+
+
+
+
+# -------------------------------- Agent Profile Response --------------------------------------
+
+

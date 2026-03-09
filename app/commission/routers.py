@@ -76,6 +76,6 @@ async def get_commission_by_bank_and_product(
     bank_id: int,
     product_id: int,
     session: SessionDep,
-    admin_user: User = Depends(require_admin)
+    # admin_user: User = Depends(require_admin)
 ):
     return await get_commission_by_bank_and_bankProduct(session, bank_id, product_id)
