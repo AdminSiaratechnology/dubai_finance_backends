@@ -51,7 +51,7 @@ async def update_coordinator_api(
     coordinator_id: int,
     data: CoordinatorUpdate,
     session: SessionDep,
-    admin_user: User = Depends(require_admin)
+    # admin_user: User = Depends(require_admin)
 ):
     return await update_coordinator(session, coordinator_id, data)
 

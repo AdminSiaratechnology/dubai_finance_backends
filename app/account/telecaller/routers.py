@@ -48,7 +48,7 @@ async def update_telecaller_api(
     telecaller_id: int,
     data: TelecallerUpdate,
     session: SessionDep,
-    admin_user: User = Depends(require_admin)
+    # admin_user: User = Depends(require_admin)
 ):
     return await update_telecaller(session, telecaller_id, data)
 
