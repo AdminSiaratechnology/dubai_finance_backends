@@ -8,6 +8,7 @@ class LeadBase(BaseModel):
     mobile_number: str
     email: EmailStr
     product_id: int
+    bank_id: int
     requested_amount: float
 
 
@@ -21,6 +22,7 @@ class LeadUpdate(BaseModel):
     mobile_number: Optional[str] = None
     email: Optional[EmailStr] = None
     product_id: Optional[int] = None
+    bank_id: Optional[int] = None
     requested_amount: Optional[float] = None
     status: Optional[str] = None
 

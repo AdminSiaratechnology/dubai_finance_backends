@@ -170,3 +170,8 @@ class AgentProfileResponse(BaseModel):
     commissions: List[CommissionOut] = []
     class Config:
         from_attributes = True
+
+class UpdateAdminProfile(BaseModel):
+    name: str
+    phone: str
+    address: str
