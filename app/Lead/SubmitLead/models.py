@@ -31,6 +31,11 @@ class Lead(Base):
         nullable=True
     )
 
+    bank_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("banks.id", ondelete="SET NULL"),
+        nullable=True
+    )
+
     requested_amount: Mapped[float] = mapped_column(Float)
 
     created_at: Mapped[datetime] = mapped_column(
@@ -73,3 +78,17 @@ class Lead(Base):
         foreign_keys=[telecaller_id],
         lazy="selectin"
     )
+
+    bank = relationship(
+        "Bank",
+        back_populates="leads",
+        lazy="selectin"
+    )
+
+class EmailOTP(Base):
+    __tablename__ = "email_otps"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String, nullable=False)
+    otp: Mapped[str] = mapped_column(String, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)

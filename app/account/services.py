@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status
 from app.account.utils import hash_password, verify_password, get_user_by_email, create_password_reset_token,verify_email_token_and_get_user_id,send_email
-from app.account.schemas import AdminRegister, AgentProfileResponse,UserLogin,UserResponse,AdminProfileResponse,TelecallerProfileResponse,CoordinatorProfileResponse,PasswordChangeRequest,PasswordResetEmailRequest,PasswordResetRequest
+from app.account.schemas import AdminRegister, AgentProfileResponse,UserLogin,UserResponse,AdminProfileResponse,TelecallerProfileResponse,CoordinatorProfileResponse,PasswordChangeRequest,PasswordResetEmailRequest,PasswordResetRequest,UpdateAdminProfile
 from sqlalchemy.orm import selectinload
 from typing import Optional
 from app.account.agent.schemas import AgentOut
@@ -175,6 +175,20 @@ async def get_user_with_profile(
 
     return user
 
+async def update_user_profile(session: AsyncSession, user_id: int, data: UpdateAdminProfile):
 
+    stmt = select(AdminProfile).where(AdminProfile.user_id == user_id)
+    result = await session.execute(stmt)
+    profile = result.scalar_one_or_none()
 
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
 
+    profile.name = data.name
+    profile.phone = data.phone
+    profile.address = data.address
+
+    await session.commit()
+    await session.refresh(profile)
+
+    return profile

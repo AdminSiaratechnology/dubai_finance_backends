@@ -6,7 +6,8 @@ from app.account.schemas import (
     PasswordResetEmailRequest,
     UserCreate,
     UserResponse,
-    PasswordResetRequest
+    PasswordResetRequest,
+    UpdateAdminProfile
     
     
 
@@ -19,7 +20,8 @@ from app.account.services import (
     get_user_with_profile,
     change_password,
     password_reset_email_send,
-    verify_password_reset_token
+    verify_password_reset_token,
+    update_user_profile
     
     
 )
@@ -177,3 +179,12 @@ async def logout(session: SessionDep, request: Request, user: User = Depends(get
   response.delete_cookie("refresh_token")
   response.delete_cookie("access_token")
   return response
+
+
+@router.put("/profile")
+async def update_profile(
+    session: SessionDep,
+    data: UpdateAdminProfile,
+    user: User = Depends(get_current_user)
+):
+    return await update_user_profile(session, user.id, data)
