@@ -1,6 +1,10 @@
+from typing import List
+
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.account.models import UserRole
 from datetime import datetime
+
+from app.commission.schemas import CommissionOut
 
 
 
@@ -147,3 +151,22 @@ class CoordinatorProfileResponse(BaseModel):
 # -------------------------------- Agent Profile Response --------------------------------------
 
 
+
+
+
+class AgentProfileResponse(BaseModel):
+    id: int
+    user_id: int
+    name : str
+    emirates_id: str
+    phone: str
+    nationality: str
+    account_holder_name: str
+    bank_name: str
+    account_number: str
+    iban: str
+    year_of_experience: int
+    business_name: str
+    commissions: List[CommissionOut] = []
+    class Config:
+        from_attributes = True
