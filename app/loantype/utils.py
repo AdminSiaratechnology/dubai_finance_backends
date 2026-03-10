@@ -41,8 +41,12 @@ TRANSFER_CONFIG = TransferConfig(
 # FILE UPLOAD FUNCTION
 # ==============================
 
-async def save_upload_file(upload_file: UploadFile, sub_dir: str) -> str:
+async def save_upload_file(upload_file: UploadFile | None, sub_dir: str) -> str | None:
     try:
+        # ✅ If file not provided
+        if upload_file is None:
+            return None
+
         allowed_types = [
             "image/jpeg",
             "image/jpg",
@@ -52,16 +56,15 @@ async def save_upload_file(upload_file: UploadFile, sub_dir: str) -> str:
 
         if upload_file.content_type not in allowed_types:
             raise HTTPException(status_code=400, detail="Invalid file type")
-        
-        # ✅ Extension validation (ADD HERE)
+
+        # ✅ Extension validation
         allowed_ext = [".jpg", ".jpeg", ".png", ".pdf"]
         ext = os.path.splitext(upload_file.filename)[-1].lower()
 
         if ext not in allowed_ext:
             raise HTTPException(status_code=400, detail="Invalid file extension")
 
-
-        # ✅ Proper size check
+        # ✅ Size validation
         contents = await upload_file.read()
         file_size = len(contents)
 
@@ -71,7 +74,6 @@ async def save_upload_file(upload_file: UploadFile, sub_dir: str) -> str:
         await upload_file.seek(0)
 
         # ✅ Unique filename
-        ext = os.path.splitext(upload_file.filename)[-1]
         filename = f"{uuid4().hex}{ext}"
         file_path = f"{sub_dir}/{filename}"
 
@@ -80,13 +82,12 @@ async def save_upload_file(upload_file: UploadFile, sub_dir: str) -> str:
             Bucket=AWS_STORAGE_BUCKET_NAME,
             Key=file_path,
             ExtraArgs={
-                "ACL": "public-read",  # remove if bucket private rakhna ho
+                "ACL": "public-read",
                 "ContentType": upload_file.content_type,
             },
             Config=TRANSFER_CONFIG,
         )
 
-        # ✅ Correct AWS S3 Public URL format
         file_url = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_REGION_NAME}.amazonaws.com/{file_path}"
 
         return file_url
