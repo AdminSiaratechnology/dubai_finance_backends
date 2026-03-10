@@ -9,7 +9,8 @@ from sqlalchemy import select
 from fastapi import HTTPException
 import smtplib
 from email.message import EmailMessage
-
+from app.email_config.models import EmailConfiguration
+from app.email_config.services import get_email_config
 
 JWT_SECRET_KEY = config("JWT_SECRET_KEY") 
 JWT_ALGORITHM = config("JWT_ALGORITHM") 
@@ -20,8 +21,8 @@ EMAIL_PASSWORD_RESET_TOKEN_TIME_HOUR = config("EMAIL_PASSWORD_RESET_TOKEN_TIME_H
 
 SMTP_HOST = config("SMTP_HOST")
 SMTP_PORT = config("SMTP_PORT", cast=int)
-SMTP_USER = config("SMTP_USER")
-SMTP_PASSWORD = config("SMTP_PASSWORD")
+# SMTP_USER = config("SMTP_USER")
+# SMTP_PASSWORD = config("SMTP_PASSWORD")
 # ------------------------------------- hassed Password ----------------------- 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -38,17 +39,23 @@ def verify_password(plain_password, hashed_password):
 
 
 
-def send_email(to_email: str, subject: str, body: str):
+async def send_email( session: AsyncSession, to_email: str, subject: str, body: str):
+    config = await get_email_config(session)
+    if not config:
+        raise HTTPException(status_code=400, detail="Email configuration not found")
     msg = EmailMessage()
-    msg["From"] = SMTP_USER
+    msg["From"] = config.smtp_user
     msg["To"] = to_email
     msg["Subject"] = subject
     msg.set_content(body)
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.send_message(msg)
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(config.smtp_user, config.smtp_password)
+            server.send_message(msg)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # --------------------------- Access Token -------------------------------------------------- 
 
