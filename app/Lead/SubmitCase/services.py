@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from app.account.utils import send_email
 from fastapi import HTTPException
 from sqlalchemy import select, delete
-# from app.User.models import User
+from app.account.models import User
 from app.Lead.SubmitLead.models import EmailOTP
 from sqlalchemy import select, func
 
