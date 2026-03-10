@@ -27,7 +27,8 @@ async def send_lead_otp(db: AsyncSession, email: str):
     db.add(otp_record)
     await db.commit()
 
-    send_email(
+    await send_email(
+        session=db,
         to_email=email,
         subject="Lead Verification OTP",
         body=f"Your OTP is {otp}. It will expire in 5 minutes."

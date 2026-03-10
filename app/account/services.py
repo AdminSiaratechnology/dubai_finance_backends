@@ -106,7 +106,8 @@ async def password_reset_email_send(session: AsyncSession, data: PasswordResetEm
 
     link = f"https://l26sd4rg-3000.inc1.devtunnels.ms/reset-password?token={token}"
 
-    send_email(
+    await send_email(
+        session=session,
         to_email=user.email,
         subject="Password Reset Request",
         body=f"""
