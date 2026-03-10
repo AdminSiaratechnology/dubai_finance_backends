@@ -10,7 +10,9 @@ from app.account.analyst.routers import router as analyst_router
 from app.account.telecaller.routers import router as telecaller_router
 from app.account.agent.routers import router as agent_router
 from app.Lead.SubmitLead.routers import router as submit_lead_router
+from app.Lead.SubmitCase.routers import router as submit_case_router
 from app.email_config.routers import router as email_config_router
+
 from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
 from fastapi.staticfiles import StaticFiles
@@ -47,3 +49,4 @@ app.include_router(telecaller_router, prefix ="/api/telecaller", tags=["Telecall
 app.include_router(agent_router, prefix ="/api/agent", tags=["Agents"])
 app.include_router(submit_lead_router, prefix="/api/leads", tags=["Leads"])
 app.include_router(email_config_router, prefix="/api/email-config", tags=["Email Config"])
+app.include_router(submit_case_router, prefix="/api/cases", tags=["Cases"])

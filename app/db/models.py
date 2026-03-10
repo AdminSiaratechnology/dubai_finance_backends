@@ -7,3 +7,5 @@ from app.category import models as category_models
 from app.commission import models as commission_models
 from app.Lead.SubmitLead import models as lead_models
 from app.email_config import models as email_config_models
+from app.Lead.SubmitCase import models as case_models
+from app.Lead.LeadDocuments import models as lead_documents_models

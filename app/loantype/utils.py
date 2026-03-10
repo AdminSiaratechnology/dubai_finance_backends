@@ -52,6 +52,14 @@ async def save_upload_file(upload_file: UploadFile, sub_dir: str) -> str:
 
         if upload_file.content_type not in allowed_types:
             raise HTTPException(status_code=400, detail="Invalid file type")
+        
+        # ✅ Extension validation (ADD HERE)
+        allowed_ext = [".jpg", ".jpeg", ".png", ".pdf"]
+        ext = os.path.splitext(upload_file.filename)[-1].lower()
+
+        if ext not in allowed_ext:
+            raise HTTPException(status_code=400, detail="Invalid file extension")
+
 
         # ✅ Proper size check
         contents = await upload_file.read()
