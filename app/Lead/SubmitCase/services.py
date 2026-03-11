@@ -120,7 +120,7 @@ async def submit_complete_case(
         emirates_front_url = await save_upload_file(emirates_id_front, f"cases/{case_id}")
         emirates_back_url = await save_upload_file(emirates_id_back, f"cases/{case_id}")
         passport_copy_url = await save_upload_file(passport_copy, f"cases/{case_id}")
-        residence_visa_url = await save_upload_file(residence_visa, f"cases/{case_id}")
+        residencevisa_url = await save_upload_file(residence_visa, f"cases/{case_id}")
         salary_certificate_url = await save_upload_file(salary_certificate, f"cases/{case_id}")
         bank_statement_last_3_months_url = await save_upload_file(bank_statement_last_3_months, f"cases/{case_id}")
         bank_statement_last_6_months_url = await save_upload_file(bank_statement_last_6_months, f"cases/{case_id}")
@@ -150,7 +150,7 @@ async def submit_complete_case(
             emirates_id_front_url=emirates_front_url,
             emirates_id_back_url=emirates_back_url,
             passport_copy_url=passport_copy_url,
-            residence_visa_url=residence_visa_url,
+            residence_visa_url=residencevisa_url,
             salary_certificate_url=salary_certificate_url,
             bank_statement_last_3_months_url=bank_statement_last_3_months_url,
             bank_statement_last_6_months_url=bank_statement_last_6_months_url,

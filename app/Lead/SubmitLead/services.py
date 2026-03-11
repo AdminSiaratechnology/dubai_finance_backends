@@ -10,28 +10,66 @@ from app.account.utils import send_email
 from typing import Optional
 
 
+# async def get_all_leads(
+#     db: AsyncSession,
+#     skip: int = 0,
+#     limit: int = 100,
+#     search: Optional[str] = None
+# ):
+#     query = select(Lead).order_by(Lead.created_at.desc())
+
+#     if search:
+#         query = query.where(
+#             or_(
+#                 Lead.customer_name.ilike(f"%%{search}%%"),
+#                 Lead.mobile_number.ilike(f"%%{search}%%"),
+#                 Lead.email.ilike(f"%%{search}%%")
+#             )
+#         )
+
+#     result = await db.execute(query.offset(skip).limit(limit))
+#     leads = result.scalars().all()
+#     return leads
+
+
 async def get_all_leads(
     db: AsyncSession,
+    user,
     skip: int = 0,
     limit: int = 100,
     search: Optional[str] = None
 ):
+
     query = select(Lead).order_by(Lead.created_at.desc())
 
+    # 🔹 Role based filter
+    if user.role == "agent":
+        query = query.where(Lead.agent_id == user.id)
+
+    elif user.role == "telecaller":
+        query = query.where(Lead.telecaller_id == user.id)
+
+    elif user.role == "admin":
+        pass  # admin ko sab data dikhega
+
+    # 🔹 Search filter
     if search:
         query = query.where(
             or_(
-                Lead.customer_name.ilike(f"%%{search}%%"),
-                Lead.mobile_number.ilike(f"%%{search}%%"),
-                Lead.email.ilike(f"%%{search}%%")
+                Lead.customer_name.ilike(f"%{search}%"),
+                Lead.mobile_number.ilike(f"%{search}%"),
+                Lead.email.ilike(f"%{search}%")
             )
         )
 
     result = await db.execute(query.offset(skip).limit(limit))
     leads = result.scalars().all()
+
     return leads
 
 
+
+    
 async def get_lead_by_id(db: AsyncSession, lead_id: int):
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalars().first()
