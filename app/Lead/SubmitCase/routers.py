@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.config import SessionDep
 from app.account.deps import get_current_user
@@ -19,7 +19,7 @@ async def send_case_otp_router(
 async def submit_complete_case_router(
     session: SessionDep,
     user: User = Depends(get_current_user),
-
+    lead_id: int | None = Form(None),
     customer_name: str = Form(...),
     mobile_number: str = Form(...),
     email: str = Form(...),
@@ -99,17 +99,18 @@ async def submit_complete_case_router(
         financial_statement,
         tax_return,
         memorandum_of_association,
-        otp  
+        otp,
+        lead_id, 
     )
 
 @router.get("/", response_model=PaginatedCaseOut)
 async def get_cases(
-    session: SessionDep,
-    page: int = 1,
-    limit: int = 10,
+    db: SessionDep,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1),
     search: str | None = None
 ):  
-    return await get_all_cases(session, page, limit, search)
+    return await get_all_cases(db, page, limit, search)
 
 
 

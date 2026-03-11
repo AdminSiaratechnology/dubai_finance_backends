@@ -9,7 +9,8 @@ from fastapi import HTTPException
 from sqlalchemy import select, delete
 from app.account.models import User
 from app.Lead.SubmitLead.models import EmailOTP
-from sqlalchemy import select, func
+from sqlalchemy import select, func,or_
+from app.Lead.SubmitLead.models import Lead
 
 async def send_case_otp(db:AsyncSession, email: str):
     otp = str(random.randint(100000, 999999))
@@ -75,7 +76,8 @@ async def submit_complete_case(
     financial_statement,
     tax_return,
     memorandum_of_association,
-    otp: str | None = None
+    otp: str | None = None,
+    lead_id: int | None = None
 ):
     try:
 
@@ -103,7 +105,18 @@ async def submit_complete_case(
                 delete(EmailOTP).where(EmailOTP.email == email)
             )
 
+        if lead_id:
+            lead_result = await db.execute(
+                select(Lead).where(Lead.id == lead_id)
+            )
+
+            lead = lead_result.scalar_one_or_none()
+
+        if not lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+
         case = Case(
+            lead_id=lead_id,
             agent_id=user.id,
             customer_name=customer_name,
             mobile_number=mobile_number,
@@ -150,7 +163,7 @@ async def submit_complete_case(
             emirates_id_front_url=emirates_front_url,
             emirates_id_back_url=emirates_back_url,
             passport_copy_url=passport_copy_url,
-            residence_visa_url=residencevisa_url,
+            residencevisa_url=residencevisa_url,
             salary_certificate_url=salary_certificate_url,
             bank_statement_last_3_months_url=bank_statement_last_3_months_url,
             bank_statement_last_6_months_url=bank_statement_last_6_months_url,
@@ -191,43 +204,41 @@ async def submit_complete_case(
         raise e
 
 
-
 async def get_all_cases(db, page: int = 1, limit: int = 10, search: str | None = None):
 
- offset = (page - 1) * limit
+    offset = (page - 1) * limit
 
- query = select(Case)
+    query = select(Case)
 
- if search:
-    query = query.where(
-    or_(
-        Case.customer_name.ilike(f"%{search}%"),
-        Case.mobile_number.ilike(f"%{search}%"),
-        Case.email.ilike(f"%{search}%"),
-        Case.passport_no.ilike(f"%{search}%"),
-        Case.emirates_id.ilike(f"%{search}%")
-    )
-)
+    if search:
+        query = query.where(
+            or_(
+                Case.customer_name.ilike(f"%{search}%"),
+                Case.mobile_number.ilike(f"%{search}%"),
+                Case.email.ilike(f"%{search}%"),
+                Case.passport_no.ilike(f"%{search}%"),
+                Case.emirates_id.ilike(f"%{search}%")
+            )
+        )
 
-# total count
+    # total count
     total_query = select(func.count()).select_from(query.subquery())
     total_result = await db.execute(total_query)
     total = total_result.scalar()
 
-# pagination
+    # pagination
     result = await db.execute(
         query.offset(offset).limit(limit)
     )
 
     cases = result.scalars().all()
+
     return {
         "total": total,
         "page": page,
         "limit": limit,
         "items": cases
     }
-
-
 
 async def get_case_by_id(db, case_id: int):
 

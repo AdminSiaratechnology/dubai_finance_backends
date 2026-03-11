@@ -9,9 +9,9 @@ class Case(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
-    # lead_id: Mapped[Optional[int]] = mapped_column(
-    #     ForeignKey("leads.id"), nullable=True
-    # )
+    lead_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("leads.id"), nullable=True
+    )
 
     agent_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
@@ -43,5 +43,11 @@ class Case(Base):
         "CaseDocument",
         back_populates="case",
         cascade="all, delete-orphan",
+        lazy="selectin"
+    )
+
+    lead = relationship(
+        "Lead",
+        back_populates="case",
         lazy="selectin"
     )

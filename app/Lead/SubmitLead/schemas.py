@@ -35,6 +35,14 @@ class LeadUpdate(BaseModel):
 
 # --------------------------- Product Lite ----------------------------
 
+class CaseLite(BaseModel):
+    id: int
+    status: str
+    requested_amount: float
+
+    class Config:
+        from_attributes = True
+
 class ProductLite(BaseModel):
     id: int
     product_name: str
@@ -47,6 +55,7 @@ class LeadOut(LeadBase):
     telecaller_id: Optional[int] = None
     product: ProductLite
     bank: Optional[BankLite]
+    case: Optional[CaseLite] = None   # 👈 yaha add karo
     # status: str
     created_at: datetime
 

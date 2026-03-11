@@ -52,11 +52,12 @@ class Lead(Base):
     # ---------------- RELATIONSHIPS ----------------
 
     # one lead → one case
-    # case = relationship(
-    #     "Case",
-    #     back_populates="lead",
-    #     uselist=False
-    # )
+    case = relationship(
+        "Case",
+        back_populates="lead",
+        uselist=False,
+        lazy="selectin"
+    )
 
     # lead → product
     product = relationship(
