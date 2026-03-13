@@ -48,3 +48,4 @@ class Bank(Base):
 )
   commissions: Mapped[list["Commission"]] = relationship(back_populates="bank",  lazy="selectin")
   leads = relationship("Lead", back_populates="bank")
+  case = relationship("Case", back_populates="bank")

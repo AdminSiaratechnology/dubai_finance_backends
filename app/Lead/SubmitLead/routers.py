@@ -20,9 +20,10 @@ async def get_leads(
     skip: int = 0,
     limit: int = 100,
     search: Optional[str] = None,
+    lead_type: Optional[str] = None,
     user: User = Depends(get_current_user)
 ):
-    return await get_all_leads(session, user, skip, limit, search)
+    return await get_all_leads(session, user, skip, limit, search, lead_type)
 
 
 @router.get("/{lead_id}", response_model=LeadOut)
