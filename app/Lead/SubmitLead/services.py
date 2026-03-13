@@ -1,7 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.Lead.SubmitLead.models import Lead, EmailOTP
+from app.Lead.SubmitCase.models import Case
 from app.Lead.SubmitLead.schemas import LeadCreate
-from sqlalchemy import select, delete, or_
+from sqlalchemy import select, delete, or_, and_
 from app.account.models import User, UserRole
 from fastapi import HTTPException
 import random
@@ -37,10 +38,11 @@ async def get_all_leads(
     user,
     skip: int = 0,
     limit: int = 100,
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    lead_type: Optional[str] = None
 ):
 
-    query = select(Lead).order_by(Lead.created_at.desc())
+    query = select(Lead).outerjoin(Case, Case.lead_id == Lead.id).order_by(Lead.created_at.desc())
 
     # 🔹 Role based filter
     if user.role == "agent":
@@ -49,8 +51,33 @@ async def get_all_leads(
     elif user.role == "telecaller":
         query = query.where(Lead.telecaller_id == user.id)
 
-    elif user.role == "admin":
-        pass  # admin ko sab data dikhega
+    # 🔹 Lead type filters
+    if lead_type == "new":
+        query = query.where(Case.id == None)
+
+    elif lead_type == "working":
+        query = query.where(
+            and_(
+                Case.id != None,
+                Case.status != "submitted_to_coordinator"
+            )
+        )
+
+    elif lead_type == "docs_required":
+        query = query.where(
+            and_(
+                Case.id != None,
+                Case.status == "documents_required"
+            )
+        )
+
+    elif lead_type == "submitted":
+        query = query.where(
+            and_(
+                Case.id != None,
+                Case.status == "submitted_to_coordinator"
+            )
+        )
 
     # 🔹 Search filter
     if search:

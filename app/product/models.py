@@ -65,4 +65,7 @@ class Product(Base):
         "Lead",
         back_populates="product"
     )
-    
+    case = relationship(
+        "Case",
+        back_populates="product"
+    )
